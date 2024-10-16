@@ -218,7 +218,7 @@ int main()
                     UnloadModel(*model);
                     free(model);
                     vector_free(animName);
-                    currentFrame = 0;
+                    currentFrame = 0.0f;
                 }
 
                 animName = (char**)vector_create();
