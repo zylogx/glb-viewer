@@ -296,6 +296,8 @@ int main()
 
         const float uiTranformsLeft = screenWidth - 200;
         GuiGroupBox((Rectangle){ uiTranformsLeft, 20, 180, 300 }, "Transform");
+
+        //----------------------------------------------------------------
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 50 + 20 * 0, 100, 15 }, 
             "PosX", 
@@ -320,6 +322,8 @@ int main()
             -50.0f, 
             50.0f
         );
+
+        //----------------------------------------------------------------
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 70 + 20 * 3, 100, 15 }, 
             "RotX", 
@@ -338,15 +342,17 @@ int main()
         );
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 70 + 20 * 5, 100, 15 }, 
-            "PosZ", 
+            "RotZ", 
             TextFormat("%3.2f", modelRot.z), 
             &modelRot.z, 
             -50.0f, 
             50.0f
         );
+
+        //----------------------------------------------------------------
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 6, 100, 15 }, 
-            "PosZ", 
+            "SclZ", 
             TextFormat("%3.2f", modelScl.x), 
             &modelScl.x, 
             0.01f, 
@@ -354,7 +360,7 @@ int main()
         );
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 7, 100, 15 }, 
-            "PosZ", 
+            "SclZ", 
             TextFormat("%3.2f", modelScl.y), 
             &modelScl.y, 
             0.01f, 
@@ -362,7 +368,7 @@ int main()
         );
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 8, 100, 15 }, 
-            "PosZ", 
+            "SclZ", 
             TextFormat("%3.2f", modelScl.z), 
             &modelScl.z, 
             0.01f, 
@@ -520,7 +526,7 @@ int main()
             }
             else
             {
-                animCurrentFrame = (unsigned int)currentFrame;
+                animCurrentFrame = (unsigned)currentFrame;
                 UpdateModelAnimation(*model, anim, animCurrentFrame);
             }
 
