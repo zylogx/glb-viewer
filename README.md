@@ -1,3 +1,3 @@
 # glb viewer
 
-https://github.com/user-attachments/assets/44c09fdf-ce53-4f03-8d76-97fb535ad6bb
+https://github.com/user-attachments/assets/6f2719d9-af02-476a-ac5e-7d147d67e8e7
