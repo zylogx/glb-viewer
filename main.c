@@ -353,7 +353,7 @@ int main()
         //----------------------------------------------------------------
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 6, 100, 15 }, 
-            "SclZ", 
+            "SclX", 
             TextFormat("%3.2f", modelScl.x), 
             &modelScl.x, 
             0.01f, 
@@ -361,7 +361,7 @@ int main()
         );
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 7, 100, 15 }, 
-            "SclZ", 
+            "SclY", 
             TextFormat("%3.2f", modelScl.y), 
             &modelScl.y, 
             0.01f, 
