@@ -256,7 +256,6 @@ int main()
             UpdateCamera(&camera, CAMERA_FREE);
         }
 
-
         //----------------------------------------------------------------
                             /* Gizmo */
         //----------------------------------------------------------------
@@ -784,11 +783,18 @@ int main()
         if (model != NULL)
         {
             const ModelAnimation anim = modelAnimation[animIndex];
-            
+
             if (isPlayAnimation)
             {
-                animCurrentFrame = (animCurrentFrame + 1) % anim.frameCount;
-                UpdateModelAnimation(*model, anim, animCurrentFrame);
+                if (anim.frameCount > 0)
+                {
+                    animCurrentFrame = (animCurrentFrame + 1) % anim.frameCount;
+                    UpdateModelAnimation(*model, anim, animCurrentFrame);
+                }
+                else
+                {
+                    animCurrentFrame = 0;
+                }
 
                 currentFrame = animCurrentFrame;
             }
@@ -797,6 +803,7 @@ int main()
                 animCurrentFrame = (unsigned)currentFrame;
                 UpdateModelAnimation(*model, anim, animCurrentFrame);
             }
+
 
             GuiSliderBar(
                 (Rectangle){ 50, screenHeight - 80, 900, 35 }, 
