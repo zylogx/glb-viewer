@@ -161,6 +161,9 @@ Camera CreateCamera()
 
 void DrawModelPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
 {
+    rot.x *= DEG2RAD;
+    rot.y *= DEG2RAD;
+    rot.z *= DEG2RAD;
     model.transform = MatrixMultiply(MatrixTranslateV(pos), MatrixMultiply(MatrixRotateXYZ(rot), MatrixScaleV(scl)));
     DrawModel(model, Vector3Zero(), 1.0f, WHITE);
 }
@@ -596,24 +599,24 @@ int main()
             "RotX", 
             TextFormat("%3.2f", modelRot.x), 
             &modelRot.x, 
-            -50.0f, 
-            50.0f
+            -360.0f, 
+            360.0f
         );
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 70 + 20 * 4, 100, 15 }, 
             "RotY", 
             TextFormat("%3.2f", modelRot.y), 
             &modelRot.y, 
-            -50.0f, 
-            50.0f
+            -360.0f, 
+            360.0f
         );
         GuiSliderBar(
             (Rectangle){ uiTranformsLeft + 40, 70 + 20 * 5, 100, 15 }, 
             "RotZ", 
             TextFormat("%3.2f", modelRot.z), 
             &modelRot.z, 
-            -50.0f, 
-            50.0f
+            -360.0f, 
+            360.0f
         );
 
         //----------------------------------------------------------------
