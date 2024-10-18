@@ -115,6 +115,38 @@ Vector3 Vector3One()
     return (Vector3){ 1.0f, 1.0f, 1.0f }; 
 }
 
+Vector3 Vector3Add(Vector3 a, Vector3 b)
+{
+    return (Vector3){ a.x + b.x, a.y + b.y, a.z + b.z };
+}
+
+Vector3 Vector3Subtract(Vector3 a, Vector3 b)
+{
+    return (Vector3){ a.x - b.x, a.y - b.y, a.z - b.z };
+}
+
+Vector3 Vector3Scale(Vector3 v, float scalar)
+{
+    return (Vector3){ v.x*scalar, v.y*scalar, v.z*scalar };
+}
+
+float Vector3DotProduct(Vector3 a, Vector3 b)
+{
+    return (float){ a.x*b.x + a.y*b.y + a.z*b.z };
+}
+
+float Vector3Distance(Vector3 a, Vector3 b)
+{
+    float result = 0.0f;
+
+    float dx = b.x - a.x;
+    float dy = b.y - a.y;
+    float dz = b.z - a.z;
+    result = sqrtf(dx*dx + dy*dy + dz*dz);
+
+    return result;
+}
+
 Camera CreateCamera()
 {
     Camera camera;
@@ -197,14 +229,245 @@ int main()
     bool isPlayAnimation = true;
     float currentFrame = 0.0f;
 
+    //----------------------------------------------------------------
+    float lastX = GetMouseX();
+    float lastY = GetMouseY();
+
+    Vector3 gizmoX = { 0.0f + 4.0f, 0.0f, 0.0f };
+    Vector3 gizmoY = { 0.0f, 0.0f + 4.0f, 0.0f };
+    Vector3 gizmoZ = { 0.0f, 0.0f, 0.0f + 4.0f };
+
+    float gizmoRad = 0.5f;
+
+    bool isGizmoMod = false;
+
+    bool gizmoXYZColors[3] = { false, false, false }; 
+
     while (!WindowShouldClose())
     {
         /* Update functions */
-        
+
+        //----------------------------------------------------------------
+                            /* Camera */
+        //----------------------------------------------------------------
+
         if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         {
             UpdateCamera(&camera, CAMERA_FREE);
         }
+
+
+        //----------------------------------------------------------------
+                            /* Gizmo */
+        //----------------------------------------------------------------
+
+        for (unsigned i = 0; i < 3; i++)
+        {
+            gizmoXYZColors[i] = false;
+        }
+
+        isGizmoMod = false;
+
+        float currentX = GetMouseX();
+        float currentY = GetMouseY();
+
+        // Get the current mouse position
+        Vector2 mousePosition = GetMousePosition();
+        Ray ray = GetMouseRay(mousePosition, camera);
+
+        /*
+        * Gizmo sphere x
+        */
+
+        Vector3 toSphereX = Vector3Subtract(gizmoX, ray.position);
+        float projectionX = Vector3DotProduct(ray.direction, toSphereX);
+
+        if (projectionX < 0)
+        {
+            projectionX = 0;
+        }
+
+        // Find the closest point on the ray to the sphere center
+        Vector3 closestPointX = Vector3Add(ray.position, Vector3Scale(ray.direction, projectionX));
+        float distanceX = Vector3Distance(closestPointX, gizmoX);
+
+        // Check if the mouse is touching the sphere
+        if (distanceX <= gizmoRad && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            isGizmoMod = true;
+
+            gizmoXYZColors[0] = true;
+
+            if (modelPos.z < camera.position.z)
+            {
+                // Move the gizmo based on mouse movement
+                if (currentX < lastX) 
+                {
+                    gizmoX.x -= 0.1f;
+                    gizmoY.x -= 0.1f;
+                    gizmoZ.x -= 0.1f;
+                } 
+                else if (currentX > lastX) 
+                {
+                    gizmoX.x += 0.1f;
+                    gizmoY.x += 0.1f;
+                    gizmoZ.x += 0.1f;
+                }
+            }
+            else
+            {
+                // Move the gizmo based on mouse movement
+                if (currentX < lastX) 
+                {
+                    gizmoX.x += 0.1f;
+                    gizmoY.x += 0.1f;
+                    gizmoZ.x += 0.1f;
+                } 
+                else if (currentX > lastX) 
+                {
+                    gizmoX.x -= 0.1f;
+                    gizmoY.x -= 0.1f;
+                    gizmoZ.x -= 0.1f;
+                }
+            }
+        }
+
+        /*
+        * Gizmo sphere y
+        */
+
+        Vector3 toSphereY = Vector3Subtract(gizmoY, ray.position);
+        float projectionY = Vector3DotProduct(ray.direction, toSphereY);
+
+        if (projectionY < 0)
+        {
+            projectionY = 0;
+        }
+
+        // Find the closest point on the ray to the sphere center
+        Vector3 closestPointY = Vector3Add(ray.position, Vector3Scale(ray.direction, projectionY));
+        float distanceY = Vector3Distance(closestPointY, gizmoY);
+
+        // Check if the mouse is touching the sphere
+        if (distanceY <= gizmoRad && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            isGizmoMod = true;
+
+            gizmoXYZColors[1] = true;
+        
+            // Move the gizmo based on mouse movement
+            if (currentY < lastY) 
+            {
+                gizmoX.y += 0.1f;
+                gizmoY.y += 0.1f;
+                gizmoZ.y += 0.1f;
+            } 
+            else if (currentY > lastY) 
+            {
+                gizmoX.y -= 0.1f;
+                gizmoY.y -= 0.1f;
+                gizmoZ.y -= 0.1f;
+            }
+        }
+
+        /*
+        * Gizmo sphere z
+        */
+
+        Vector3 toSphereZ = Vector3Subtract(gizmoZ, ray.position);
+        float projectionZ = Vector3DotProduct(ray.direction, toSphereZ);
+
+        if (projectionZ < 0)
+        {
+            projectionZ = 0;
+        }
+
+        // Find the closest point on the ray to the sphere center
+        Vector3 closestPointZ = Vector3Add(ray.position, Vector3Scale(ray.direction, projectionZ));
+        float distanceZ = Vector3Distance(closestPointZ, gizmoZ);
+
+        // Check if the mouse is touching the sphere
+        if (distanceZ <= gizmoRad && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            isGizmoMod = true;
+
+            gizmoXYZColors[2] = true;
+
+            if (modelPos.x < camera.position.x)
+            {
+                // Move the gizmo based on mouse movement
+                if (currentX < lastX) 
+                {
+                    gizmoX.z += 0.1f;
+                    gizmoY.z += 0.1f;
+                    gizmoZ.z += 0.1f;
+                } 
+                else if (currentX > lastX) 
+                {
+                    gizmoX.z -= 0.1f;
+                    gizmoY.z -= 0.1f;
+                    gizmoZ.z -= 0.1f;
+                }
+                else if (currentY < lastY) 
+                {
+                    gizmoX.z -= 0.1f;
+                    gizmoY.z -= 0.1f;
+                    gizmoZ.z -= 0.1f;
+                } 
+                else if (currentY > lastY) 
+                {
+                    gizmoX.z += 0.1f;
+                    gizmoY.z += 0.1f;
+                    gizmoZ.z += 0.1f;
+                }
+            }
+            else
+            {
+                // Move the gizmo based on mouse movement
+                if (currentX < lastX) 
+                {
+                    gizmoX.z -= 0.1f;
+                    gizmoY.z -= 0.1f;
+                    gizmoZ.z -= 0.1f;
+                } 
+                else if (currentX > lastX) 
+                {
+                    gizmoX.z += 0.1f;
+                    gizmoY.z += 0.1f;
+                    gizmoZ.z += 0.1f;
+                }
+                else if (currentY < lastY) 
+                {
+                    gizmoX.z += 0.1f;
+                    gizmoY.z += 0.1f;
+                    gizmoZ.z += 0.1f;
+                } 
+                else if (currentY > lastY) 
+                {
+                    gizmoX.z -= 0.1f;
+                    gizmoY.z -= 0.1f;
+                    gizmoZ.z -= 0.1f;
+                }
+            }
+        }
+
+        lastX = currentX; // Update lastX to current position
+        lastY = currentY; // Update lastY to current position
+
+        if (isGizmoMod)
+        {
+            modelPos = (Vector3){ gizmoX.x - 4, gizmoX.y, gizmoX.z };
+        }
+        else
+        {
+            gizmoX = (Vector3){ modelPos.x + 4.0f, modelPos.y, modelPos.z };
+            gizmoY = (Vector3){ modelPos.x, modelPos.y + 4.0f, modelPos.z };
+            gizmoZ = (Vector3){ modelPos.x, modelPos.y, modelPos.z + 4.0f };
+        }
+
+        //----------------------------------------------------------------
+                            /* Load model button */
+        //----------------------------------------------------------------
 
         if (fileDialogState.SelectFilePressed)
         {
@@ -265,6 +528,10 @@ int main()
             fileDialogState.SelectFilePressed = false;
         }
 
+        //----------------------------------------------------------------
+                            /* Model */
+        //----------------------------------------------------------------
+
         // 0 = 1.0f, 1 = 2.0f, 2 = 3.0f
         maxScl = (maxSclActiveOption == 0) ? 1.0f : (maxSclActiveOption == 1) ? 2.0f : 3.0f;
 
@@ -281,13 +548,13 @@ int main()
             DrawModelPro(*model, modelPos, modelRot, modelScl);
         }
 
-        DrawLine3D(modelPos, (Vector3){ modelPos.x + 4, modelPos.y, modelPos.z }, RED);
-        DrawLine3D(modelPos, (Vector3){ modelPos.x, modelPos.y + 4, modelPos.z }, DARKGREEN);
-        DrawLine3D(modelPos, (Vector3){ modelPos.x, modelPos.y, modelPos.z + 4 }, DARKBLUE);
+        DrawLine3D((Vector3){ gizmoX.x - 4, gizmoX.y, gizmoX.z }, gizmoX, (gizmoXYZColors[0]) ? RED : MAROON);
+        DrawLine3D((Vector3){ gizmoY.x, gizmoY.y - 4, gizmoY.z }, gizmoY, (gizmoXYZColors[1]) ? GREEN : DARKGREEN);
+        DrawLine3D((Vector3){ gizmoZ.x, gizmoZ.y, gizmoZ.z - 4 }, gizmoZ, (gizmoXYZColors[2]) ? BLUE : DARKBLUE);
 
-        DrawSphere((Vector3){ modelPos.x + 4, modelPos.y, modelPos.z }, 0.1f, RED);
-        DrawSphere((Vector3){ modelPos.x, modelPos.y + 4, modelPos.z }, 0.1f, DARKGREEN);
-        DrawSphere((Vector3){ modelPos.x, modelPos.y, modelPos.z + 4 }, 0.1f, DARKBLUE);
+        DrawSphere(gizmoX, gizmoRad * 0.2f, (gizmoXYZColors[0]) ? RED : MAROON);
+        DrawSphere(gizmoY, gizmoRad * 0.2f, (gizmoXYZColors[1]) ? GREEN : DARKGREEN);
+        DrawSphere(gizmoZ, gizmoRad * 0.2f, (gizmoXYZColors[2]) ? BLUE : DARKBLUE);
 
         EndMode3D();
 
