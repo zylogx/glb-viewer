@@ -780,6 +780,7 @@ int main()
             }
         }
 
+        //----------------------------------------------------------------
         if (model != NULL)
         {
             const ModelAnimation anim = modelAnimation[animIndex];
@@ -804,7 +805,6 @@ int main()
                 UpdateModelAnimation(*model, anim, animCurrentFrame);
             }
 
-
             GuiSliderBar(
                 (Rectangle){ 50, screenHeight - 80, 900, 35 }, 
                 "Frame:", 
@@ -821,6 +821,7 @@ int main()
             }
         }
 
+        //----------------------------------------------------------------
         if (fileDialogState.windowActive)
         {
             GuiLock();
@@ -835,6 +836,7 @@ int main()
 
         GuiWindowFileDialog(&fileDialogState);
 
+        //----------------------------------------------------------------
         if (warningMessage)
         {
             int result = GuiMessageBox(
@@ -853,6 +855,7 @@ int main()
         EndDrawing();
     }
 
+    //----------------------------------------------------------------
     if (model != NULL)
     {
         UnloadModelAnimations(modelAnimation, animsCount);
