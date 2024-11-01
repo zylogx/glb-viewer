@@ -535,7 +535,7 @@ int main()
         //----------------------------------------------------------------
 
         // 0 = 1.0f, 1 = 2.0f, 2 = 3.0f
-        maxScl = (maxSclActiveOption == 0) ? 1.0f : (maxSclActiveOption == 1) ? 2.0f : 3.0f;
+        maxScl = (float)maxSclActiveOption + 1.0f;
 
         /* Draw functions */
 
