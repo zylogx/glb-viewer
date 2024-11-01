@@ -263,9 +263,12 @@ int main()
                             /* Gizmo */
         //----------------------------------------------------------------
 
-        for (unsigned i = 0; i < 3; i++)
+        if (!IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            gizmoXYZColors[i] = false;
+            for (unsigned i = 0; i < 3; i++)
+            {
+                gizmoXYZColors[i] = false;
+            }
         }
 
         isGizmoMod = false;
