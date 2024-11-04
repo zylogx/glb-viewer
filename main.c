@@ -168,6 +168,15 @@ void DrawModelPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
     DrawModel(model, Vector3Zero(), 1.0f, WHITE);
 }
 
+void DrawModelWiresPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
+{
+    rot.x *= DEG2RAD;
+    rot.y *= DEG2RAD;
+    rot.z *= DEG2RAD;
+    model.transform = MatrixMultiply(MatrixTranslateV(pos), MatrixMultiply(MatrixRotateXYZ(rot), MatrixScaleV(scl)));
+    DrawModelWires(model, Vector3Zero(), 1.0f, WHITE);
+}
+
 bool IsMousePressed()
 {
     return IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsMouseButtonPressed(MOUSE_RIGHT_BUTTON);
@@ -244,7 +253,9 @@ int main()
 
     bool isGizmoMod = false;
 
-    bool gizmoXYZColors[3] = { false, false, false }; 
+    bool gizmoXYZColors[3] = { false, false, false };
+
+    bool isDrawWires = false; 
 
     while (!WindowShouldClose())
     {
@@ -550,7 +561,14 @@ int main()
         
         if (model != NULL)
         {
-            DrawModelPro(*model, modelPos, modelRot, modelScl);
+            if (isDrawWires)
+            {
+                DrawModelWiresPro(*model, modelPos, modelRot, modelScl);
+            }
+            else
+            {
+                DrawModelPro(*model, modelPos, modelRot, modelScl);
+            }
         }
 
         DrawLine3D((Vector3){ gizmoX.x - 4, gizmoX.y, gizmoX.z }, gizmoX, (gizmoXYZColors[0]) ? RED : MAROON);
@@ -663,7 +681,7 @@ int main()
         /* Settings */
 
         const float uiSettingsLeft = screenWidth - 200;
-        GuiGroupBox((Rectangle){ uiSettingsLeft, 350, 180, 180 }, "Settings");
+        GuiGroupBox((Rectangle){ uiSettingsLeft, 350, 180, 220 }, "Settings");
 
         GuiDrawText("Max Scale:", (Rectangle){ uiSettingsLeft + 10, 360, 100, 20 }, 0, GRAY);
 
@@ -784,6 +802,16 @@ int main()
                     animNameDropdownEditMode = !animNameDropdownEditMode;  // Open dropdown
                 }
             }
+        }
+
+        //----------------------------------------------------------------
+        if (!maxSclDropdownEditMode && !targetFPSDropdownEditMode && !animNameDropdownEditMode)
+        {
+            GuiCheckBox(
+                (Rectangle){ uiSettingsLeft + 10, 520, 15, 15 }, 
+                "Draw Wires",
+                &isDrawWires
+            );
         }
 
         //----------------------------------------------------------------
