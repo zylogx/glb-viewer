@@ -274,19 +274,13 @@ Camera CreateCamera()
 
 void DrawModelPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
 {
-    rot.x *= DEG2RAD;
-    rot.y *= DEG2RAD;
-    rot.z *= DEG2RAD;
-    model.transform = MatrixMultiply(MatrixTranslateV(pos), MatrixMultiply(MatrixRotateXYZ(rot), MatrixScaleV(scl)));
+    model.transform = MatrixMultiply(MatrixTranslateV(pos), MatrixMultiply(MatrixRotateV(rot), MatrixScaleV(scl)));
     DrawModel(model, Vector3Zero(), 1.0f, WHITE);
 }
 
 void DrawModelWiresPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
 {
-    rot.x *= DEG2RAD;
-    rot.y *= DEG2RAD;
-    rot.z *= DEG2RAD;
-    model.transform = MatrixMultiply(MatrixTranslateV(pos), MatrixMultiply(MatrixRotateXYZ(rot), MatrixScaleV(scl)));
+    model.transform = MatrixMultiply(MatrixTranslateV(pos), MatrixMultiply(MatrixRotateV(rot), MatrixScaleV(scl)));
     DrawModelWires(model, Vector3Zero(), 1.0f, WHITE);
 }
 
