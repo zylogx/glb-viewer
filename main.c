@@ -78,10 +78,7 @@ Matrix MatrixScaleV(Vector3 v)
 
 Matrix MatrixRotateXYZ(Vector3 angle)
 {
-    Matrix result = { 1.0f, 0.0f, 0.0f, 0.0f,
-                      0.0f, 1.0f, 0.0f, 0.0f,
-                      0.0f, 0.0f, 1.0f, 0.0f,
-                      0.0f, 0.0f, 0.0f, 1.0f };
+    Matrix result = { 0 };
 
     float cosz = cosf(-angle.z);
     float sinz = sinf(-angle.z);
@@ -90,17 +87,123 @@ Matrix MatrixRotateXYZ(Vector3 angle)
     float cosx = cosf(-angle.x);
     float sinx = sinf(-angle.x);
 
-    result.m0 = cosz*cosy;
-    result.m1 = (cosz*siny*sinx) - (sinz*cosx);
-    result.m2 = (cosz*siny*cosx) + (sinz*sinx);
+    result.m0 = cosz * cosy;
+    result.m1 = (cosz * siny * sinx) - (sinz * cosx);
+    result.m2 = (cosz * siny * cosx) + (sinz * sinx);
+    result.m3 = 0.0f;
 
-    result.m4 = sinz*cosy;
-    result.m5 = (sinz*siny*sinx) + (cosz*cosx);
-    result.m6 = (sinz*siny*cosx) - (cosz*sinx);
+    result.m4 = sinz * cosy;
+    result.m5 = (sinz * siny * sinx) + (cosz * cosx);
+    result.m6 = (sinz * siny * cosx) - (cosz * sinx);
+    result.m7 = 0.0f;
 
     result.m8 = -siny;
-    result.m9 = cosy*sinx;
-    result.m10= cosy*cosx;
+    result.m9 = cosy * sinx;
+    result.m10 = cosy * cosx;
+    result.m11 = 0.0f;
+
+    result.m12 = 0.0f;
+    result.m13 = 0.0f;
+    result.m14 = 0.0f;
+    result.m15 = 1.0f;
+
+    return result;;
+}
+
+Matrix QuaternionToMatrix(Quaternion q) 
+{
+    Matrix result = { 0 };
+
+    // Normalize the quaternion
+    float norm = sqrt(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+    if (norm > 0.0f) 
+    {
+        q.x /= norm;
+        q.y /= norm;
+        q.z /= norm;
+        q.w /= norm;
+    }
+
+    // Pre-calculate repeated values
+    float xx = q.x*q.x;
+    float yy = q.y*q.y;
+    float zz = q.z*q.z;
+    float xy = q.x*q.y;
+    float xz = q.x*q.z;
+    float yz = q.y*q.z;
+    float wx = q.w*q.x;
+    float wy = q.w*q.y;
+    float wz = q.w*q.z;
+
+    // Set matrix elements
+    result.m0 = 1.0f - 2.0f*(yy + zz);
+    result.m1 = 2.0f*(xy - wz);
+    result.m2 = 2.0f*(xz + wy);
+    result.m3 = 0.0f;
+
+    result.m4 = 2.0f*(xy + wz);
+    result.m5 = 1.0f - 2.0f*(xx + zz);
+    result.m6 = 2.0f*(yz - wx);
+    result.m7 = 0.0f;
+
+    result.m8 = 2.0f*(xz - wy);
+    result.m9 = 2.0f*(yz + wx);
+    result.m10 = 1.0f - 2.0f*(xx + yy);
+    result.m11 = 0.0f;
+
+    result.m12 = 0.0f;
+    result.m13 = 0.0f;
+    result.m14 = 0.0f;
+    result.m15 = 1.0f;
+
+    return result;
+}
+
+Matrix MatrixRotateV(Vector3 v)
+{
+    v.x *= DEG2RAD;
+    v.y *= DEG2RAD;
+    v.z *= DEG2RAD;
+
+    return MatrixRotateXYZ(v);
+}
+
+Quaternion QuaternionMultiply(Quaternion a, Quaternion b) 
+{
+    Quaternion result;
+
+    result.x = a.w*b.x + a.x*b.w + a.y*b.z - a.z*b.y;
+    result.y = a.w*b.y - a.x*b.z + a.y*b.w + a.z*b.x;
+    result.z = a.w*b.z + a.x*b.y - a.y*b.x + a.z*b.w;
+    result.w = a.w*b.w - a.x*b.x - a.y*b.y - a.z*b.z;
+
+    return result;
+}
+
+Quaternion QuaternionInvert(Quaternion q) 
+{
+    Quaternion result;
+    
+    // Calculate the magnitude squared of the quaternion
+    float normSquared = q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w;
+
+    if (normSquared > 0.0f) 
+    {
+        // Inverse of a quaternion q = (conjugate(q)) / (norm(q)^2)
+        float invNorm = 1.0f / normSquared;
+        result.x = -q.x*invNorm;
+        result.y = -q.y*invNorm;
+        result.z = -q.z*invNorm;
+        result.w = q.w*invNorm;
+    } 
+    else 
+    {
+        // Return identity quaternion if the input quaternion is zero (non-invertible)
+        result.x = 0.0f;
+        result.y = 0.0f;
+        result.z = 0.0f;
+        result.w = 1.0f;
+    }
 
     return result;
 }
@@ -123,6 +226,16 @@ Vector3 Vector3Add(Vector3 a, Vector3 b)
 Vector3 Vector3Subtract(Vector3 a, Vector3 b)
 {
     return (Vector3){ a.x - b.x, a.y - b.y, a.z - b.z };
+}
+
+Vector3 Vector3Multiply(Vector3 a, Vector3 b)
+{
+    return (Vector3){ a.x * b.x, a.y * b.y, a.z * b.z };
+}
+
+Vector3 Vector3Multiply(Vector3 v, float scalar)
+{
+    return (Vector3){ v.x * scalar, v.y * scalar, v.z * scalar };
 }
 
 Vector3 Vector3Scale(Vector3 v, float scalar)
