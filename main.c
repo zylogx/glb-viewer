@@ -30,6 +30,8 @@
 #define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
 #include "gui_window_file_dialog.h"
 
+#define debug true
+
 const int screenWidth = 1080;
 const int screenHeight = 720;
 
@@ -107,7 +109,7 @@ Matrix MatrixRotateXYZ(Vector3 angle)
     result.m14 = 0.0f;
     result.m15 = 1.0f;
 
-    return result;;
+    return result;
 }
 
 Matrix QuaternionToMatrix(Quaternion q) 
@@ -289,6 +291,13 @@ bool IsMousePressed()
     return IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsMouseButtonPressed(MOUSE_RIGHT_BUTTON);
 }
 
+void LoadRobot(bool* flag)
+{
+#if debug
+    if (IsKeyPressed(KEY_K)) *flag = true;
+#endif
+}
+
 int main()
 {
     /* Window */
@@ -362,7 +371,9 @@ int main()
 
     bool gizmoXYZColors[3] = { false, false, false };
 
-    bool isDrawWires = false; 
+    bool isDrawWires = false;
+
+    bool loadFromKey = false; 
 
     while (!WindowShouldClose())
     {
@@ -592,6 +603,8 @@ int main()
                             /* Load model button */
         //----------------------------------------------------------------
 
+        LoadRobot(&loadFromKey);
+
         if (fileDialogState.SelectFilePressed)
         {
             // Load model file (if supported extension)
@@ -649,6 +662,55 @@ int main()
             }
 
             fileDialogState.SelectFilePressed = false;
+        }
+
+        if (loadFromKey)
+        {
+            if (model != NULL)
+            {
+                UnloadModel(*model);
+                free(model);
+                vector_free(animName);
+                currentFrame = 0.0f;
+            }
+
+            animName = (char**)vector_create();
+            model = (Model*)malloc(sizeof(Model));
+            *model = LoadModel("./robot.glb");
+            modelAnimation = LoadModelAnimations("./robot.glb", &animsCount);
+
+            for (unsigned i = 0; i < animsCount; i++)
+            {
+                char* name = strdup(modelAnimation[i].name); // Duplicate the string
+                vector_add(&animName, name); // Add the duplicated name to the vector
+                
+                TraceLog(LOG_INFO, "Animation %d: %s", i, name);
+            }
+
+            // Calculate the size of the new string
+            size_t totalLength = 0;
+            for (unsigned i = 0; i < animsCount; i++)
+            {
+                totalLength += strlen(animName[i]);
+            }
+            totalLength += animsCount - 1; // For the semicolons
+            totalLength += 1; // For the null terminator
+
+            // Allocate memory for the new concatenated string
+            animNameOptions = (char*)malloc(totalLength * sizeof(char));
+            
+            assert(animNameOptions != NULL);
+
+            strcpy(animNameOptions, animName[0]); // Copy the first name
+
+            // Concatenate the rest of the names
+            for (unsigned i = 1; i < animsCount; i++)
+            {
+                strcat(animNameOptions, ";");
+                strcat(animNameOptions, animName[i]);
+            }
+
+            loadFromKey = false;
         }
 
         //----------------------------------------------------------------
