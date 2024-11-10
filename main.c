@@ -210,6 +210,31 @@ Quaternion QuaternionInvert(Quaternion q)
     return result;
 }
 
+Quaternion QuaternionFromEuler(Vector3 angle)
+{
+    // Calculate half angles
+    float halfPitch = angle.x * 0.5f;
+    float halfYaw = angle.y * 0.5f;
+    float halfRoll = angle.z * 0.5f;
+
+    // Calculate sin and cos for each half angle
+    float sinPitch = sinf(halfPitch);
+    float cosPitch = cosf(halfPitch);
+    float sinYaw = sinf(halfYaw);
+    float cosYaw = cosf(halfYaw);
+    float sinRoll = sinf(halfRoll);
+    float cosRoll = cosf(halfRoll);
+
+    // Calculate quaternion components
+    return (Quaternion) 
+    {
+        cosYaw * sinPitch * cosRoll + sinYaw * cosPitch * sinRoll,  
+        sinYaw * cosPitch * cosRoll - cosYaw * sinPitch * sinRoll, 
+        cosYaw * cosPitch * sinRoll - sinYaw * sinPitch * cosRoll, 
+        cosYaw * cosPitch * cosRoll + sinYaw * sinPitch * sinRoll   
+    };
+}
+
 Vector3 Vector3Zero() 
 { 
     return (Vector3){ 0.0f, 0.0f, 0.0f }; 
@@ -262,6 +287,46 @@ float Vector3Distance(Vector3 a, Vector3 b)
     return result;
 }
 
+Vector3 Vector3RotateByQuaternion(Vector3 v, Quaternion q)
+{
+    // Quaternion-vector multiplication: v' = q * v * q⁻¹
+    Quaternion qConjugate = (Quaternion){ -q.x, -q.y, -q.z, q.w };
+
+    // Convert vector to quaternion form (v.x, v.y, v.z, 0)
+    Quaternion vQuat = (Quaternion){ v.x, v.y, v.z, 0.0f };
+
+    // Calculate q * v
+    Quaternion qv = (Quaternion)
+    {
+        q.w*vQuat.x + q.y*vQuat.z - q.z*vQuat.y,
+        q.w*vQuat.y + q.z*vQuat.x - q.x*vQuat.z,
+        q.w*vQuat.z + q.x*vQuat.y - q.y*vQuat.x,
+        -q.x*vQuat.x - q.y*vQuat.y - q.z*vQuat.z
+    };
+
+    // Calculate (q * v) * q⁻¹
+    Quaternion resultQuat = (Quaternion)
+    {
+        qv.w*qConjugate.x + qv.x*qConjugate.w + qv.y*qConjugate.z - qv.z*qConjugate.y,
+        qv.w*qConjugate.y - qv.x*qConjugate.z + qv.y*qConjugate.w + qv.z*qConjugate.x,
+        qv.w*qConjugate.z + qv.x*qConjugate.y - qv.y*qConjugate.x + qv.z*qConjugate.w,
+        qv.w*qConjugate.w - qv.x*qConjugate.x - qv.y*qConjugate.y - qv.z*qConjugate.z
+    };
+
+    // Return only the vector part of the resulting quaternion
+    return (Vector3){ resultQuat.x, resultQuat.y, resultQuat.z };
+}
+
+Vector3 Vector3Transform(Vector3 v, Matrix mat)
+{
+    return (Vector3)
+    {
+        v.x*mat.m0 + v.y*mat.m4 + v.z*mat.m8 + mat.m12,
+        v.x*mat.m1 + v.y*mat.m5 + v.z*mat.m9 + mat.m13,
+        v.x*mat.m2 + v.y*mat.m6 + v.z*mat.m10 + mat.m14
+    };
+}
+
 Camera CreateCamera()
 {
     Camera camera;
@@ -284,6 +349,33 @@ void DrawModelWiresPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
 {
     model.transform = MatrixMultiply(MatrixTranslateV(pos), MatrixMultiply(MatrixRotateV(rot), MatrixScaleV(scl)));
     DrawModelWires(model, Vector3Zero(), 1.0f, WHITE);
+}
+
+void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl)
+{
+    Matrix rotationMatrix = MatrixRotateV(rot);
+
+    for (unsigned i = 0; i < model.boneCount-1; i++)
+    {
+        // Get the current bone translation and apply scaling
+        Vector3 translation = anims[animIndex].framePoses[animCurrentFrame][i].translation;
+        Vector3 finalTranslation = Vector3Transform(Vector3Multiply(translation, scl), rotationMatrix);
+        finalTranslation = Vector3Add(finalTranslation, pos); // Final transformed position
+
+        DrawCubeV(finalTranslation, Vector3Multiply(scl, 0.1f), GREEN);
+
+        int parentIndex = anims[animIndex].bones[i].parent;
+        if (parentIndex >= 0)
+        {
+            // Get the parent's translation and apply transformations
+            Vector3 parentTranslation = anims[animIndex].framePoses[animCurrentFrame][parentIndex].translation;
+            Vector3 parentFinalTranslation = Vector3Transform(Vector3Multiply(parentTranslation, scl), rotationMatrix);
+            parentFinalTranslation = Vector3Add(parentFinalTranslation, pos); // Final transformed position for parent
+
+            // Draw a line between the bone and its parent
+            DrawLine3D(finalTranslation, parentFinalTranslation, BLUE);
+        }
+    }
 }
 
 bool IsMousePressed()
@@ -733,6 +825,7 @@ int main()
             if (isDrawWires)
             {
                 DrawModelWiresPro(*model, modelPos, modelRot, modelScl);
+                DrawModelBones(*model, modelAnimation, animIndex, animCurrentFrame, modelPos, modelRot, modelScl);
             }
             else
             {
