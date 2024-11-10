@@ -945,20 +945,24 @@ int main()
                 animCurrentFrame = (unsigned)currentFrame;
                 UpdateModelAnimation(*model, anim, animCurrentFrame);
             }
-
-            GuiSliderBar(
-                (Rectangle){ 50, screenHeight - 80, 900, 35 }, 
-                "Frame:", 
-                TextFormat("%3.2f", currentFrame), 
-                &currentFrame, 
-                0, 
-                anim.frameCount
-            );
-
-            if (GuiButton((Rectangle){ screenWidth - 90, screenHeight - 80, 75, 30 }, 
-                (isPlayAnimation) ? GuiIconText(ICON_PLAYER_PAUSE, "PAUSE") : GuiIconText(ICON_PLAYER_PLAY, "PLAY")))
+            
+            //----------------------------------------------------------------
+            if (!maxSclDropdownEditMode && !targetFPSDropdownEditMode && !animNameDropdownEditMode)
             {
-                isPlayAnimation = !isPlayAnimation;
+                GuiSliderBar(
+                    (Rectangle){ 50, screenHeight - 80, 900, 35 }, 
+                    "Frame:", 
+                    TextFormat("%3.2f", currentFrame), 
+                    &currentFrame, 
+                    0, 
+                    anim.frameCount
+                );
+
+                if (GuiButton((Rectangle){ screenWidth - 90, screenHeight - 80, 75, 30 }, 
+                    (isPlayAnimation) ? GuiIconText(ICON_PLAYER_PAUSE, "PAUSE") : GuiIconText(ICON_PLAYER_PLAY, "PLAY")))
+                {
+                    isPlayAnimation = !isPlayAnimation;
+                }
             }
         }
 
