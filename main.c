@@ -826,6 +826,8 @@ int main()
                     free(model);
                     vector_free(animName);
                     currentFrame = 0.0f;
+                    animNameOptions = " ";
+                    animNameActiveOption = 0; 
                 }
 
                 if (vector_size(animName) < 8)
@@ -916,6 +918,8 @@ int main()
                 free(model);
                 vector_free(animName);
                 currentFrame = 0.0f;
+                animNameOptions = " ";
+                animNameActiveOption = 0; 
             }
 
             animName = (char**)vector_create();
