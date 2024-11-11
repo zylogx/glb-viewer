@@ -400,7 +400,7 @@ bool IsMousePressed()
 
 bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, bool* isDragging, unsigned* index)
 {
-    const int max = vector_size(v);
+    const unsigned max = vector_size(v);
 
     // Adjust start and end based on scroll input (mouse wheel)
     if (GetMouseWheelMove() < 0.0f && *end < max)
@@ -414,24 +414,13 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
         *end -= 1;
     }
 
-    // Draw dropdown items
-    bool isSetIndex = false;
-    for (unsigned i = 0, j = *start; i < max && j < *end; i++, j++)
-    {
-        Rectangle itemRec = { rec.x, rec.y + rec.height*i, rec.width, rec.height };
-
-        if (GuiButton(itemRec, v[j]))
-        {
-            isSetIndex = true;
-            *index = j;
-        }
-    }
+    Rectangle editModeRec = { rec.x, rec.y + rec.height, rec.width + 11, rec.height*5 };
 
     // Draw scrollbar if the number of items exceeds the visible range
     if (max > 5)
     {
         // Scrollbar background
-        Rectangle scrollbarRec = { rec.x + rec.width + 1, rec.y, 10, rec.height*5 };
+        Rectangle scrollbarRec = { rec.x + rec.width + 1, rec.y + rec.height, 10, rec.height*5 };
         DrawRectangleRec(scrollbarRec, LIGHTGRAY);
 
         // Calculate the height and position of the scroll thumb
@@ -474,10 +463,26 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
             *end = *start + 5;
         }
 
-        if (IsMousePressed())
+        // Draw dropdown items
+        for (unsigned i = 0, j = *start; i < max && j < *end; i++, j++)
         {
-            //return *isDragging && isSetIndex;
+            Rectangle itemRec = { rec.x, rec.y + rec.height*i + rec.height, rec.width, rec.height };
+
+            if (GuiButton(itemRec, v[j]))
+            {
+                *index = j;
+
+                return false;
+            }
+
+            if (IsMousePressed() && !CheckCollisionPointRec(mousePos, editModeRec))
+            {
+                return false;
+            }
         }
+
+        // Debug rec
+        //DrawRectangleRec(editModeRec, RED);
 
         return result;
     }
@@ -1272,17 +1277,26 @@ int main()
                     // If mouse is pressed and not in drag mode, set edit mode to false
                     if (!editMode)
                     {
+                        animNameOptions = animName[animIndex];
                         animNameDropdownEditMode = false;
                     }
-                }
-                else
-                {
-                    // Draw the dropdown box
+
+                    // Draw the static dropdown box
                     GuiDropdownBox(
                         (Rectangle){ uiSettingsLeft + 40, 480, 100, 20 }, 
                         animNameOptions, 
                         &animNameActiveOption, 
-                        animNameDropdownEditMode
+                        false
+                    );
+                }
+                else
+                {
+                    // Draw the static dropdown box
+                    GuiDropdownBox(
+                        (Rectangle){ uiSettingsLeft + 40, 480, 100, 20 }, 
+                        animNameOptions, 
+                        &animNameActiveOption, 
+                        false
                     );
 
                     // Toggle dropdown edit mode when clicking the top rectangle (collapsed dropdown)
