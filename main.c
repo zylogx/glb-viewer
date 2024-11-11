@@ -415,12 +415,14 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
     }
 
     // Draw dropdown items
+    bool isSetIndex = false;
     for (unsigned i = 0, j = *start; i < max && j < *end; i++, j++)
     {
         Rectangle itemRec = { rec.x, rec.y + rec.height*i, rec.width, rec.height };
 
         if (GuiButton(itemRec, v[j]))
         {
+            isSetIndex = true;
             *index = j;
         }
     }
@@ -474,7 +476,7 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
 
         if (IsMousePressed())
         {
-            return *isDragging;
+            //return *isDragging && isSetIndex;
         }
 
         return result;
