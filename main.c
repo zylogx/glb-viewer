@@ -89,19 +89,19 @@ Matrix MatrixRotateXYZ(Vector3 angle)
     float cosx = cosf(-angle.x);
     float sinx = sinf(-angle.x);
 
-    result.m0 = cosz * cosy;
-    result.m1 = (cosz * siny * sinx) - (sinz * cosx);
-    result.m2 = (cosz * siny * cosx) + (sinz * sinx);
+    result.m0 = cosz*cosy;
+    result.m1 = (cosz*siny*sinx) - (sinz*cosx);
+    result.m2 = (cosz*siny*cosx) + (sinz*sinx);
     result.m3 = 0.0f;
 
-    result.m4 = sinz * cosy;
-    result.m5 = (sinz * siny * sinx) + (cosz * cosx);
-    result.m6 = (sinz * siny * cosx) - (cosz * sinx);
+    result.m4 = sinz*cosy;
+    result.m5 = (sinz*siny*sinx) + (cosz*cosx);
+    result.m6 = (sinz*siny*cosx) - (cosz*sinx);
     result.m7 = 0.0f;
 
     result.m8 = -siny;
-    result.m9 = cosy * sinx;
-    result.m10 = cosy * cosx;
+    result.m9 = cosy*sinx;
+    result.m10 = cosy*cosx;
     result.m11 = 0.0f;
 
     result.m12 = 0.0f;
@@ -148,8 +148,8 @@ Matrix QuaternionToMatrix(Quaternion q)
     result.m6 = 2.0f*(yz - wx);
     result.m7 = 0.0f;
 
-    result.m8 = 2.0f*(xz - wy);
-    result.m9 = 2.0f*(yz + wx);
+    result.m8  = 2.0f*(xz - wy);
+    result.m9  = 2.0f*(yz + wx);
     result.m10 = 1.0f - 2.0f*(xx + yy);
     result.m11 = 0.0f;
 
@@ -213,25 +213,24 @@ Quaternion QuaternionInvert(Quaternion q)
 Quaternion QuaternionFromEuler(Vector3 angle)
 {
     // Calculate half angles
-    float halfPitch = angle.x * 0.5f;
-    float halfYaw = angle.y * 0.5f;
-    float halfRoll = angle.z * 0.5f;
+    float halfPitch = angle.x*0.5f;
+    float halfYaw   = angle.y*0.5f;
+    float halfRoll  = angle.z*0.5f;
 
     // Calculate sin and cos for each half angle
     float sinPitch = sinf(halfPitch);
     float cosPitch = cosf(halfPitch);
-    float sinYaw = sinf(halfYaw);
-    float cosYaw = cosf(halfYaw);
-    float sinRoll = sinf(halfRoll);
-    float cosRoll = cosf(halfRoll);
+    float sinYaw   = sinf(halfYaw);
+    float cosYaw   = cosf(halfYaw);
+    float sinRoll  = sinf(halfRoll);
+    float cosRoll  = cosf(halfRoll);
 
-    // Calculate quaternion components
     return (Quaternion) 
     {
-        cosYaw * sinPitch * cosRoll + sinYaw * cosPitch * sinRoll,  
-        sinYaw * cosPitch * cosRoll - cosYaw * sinPitch * sinRoll, 
-        cosYaw * cosPitch * sinRoll - sinYaw * sinPitch * cosRoll, 
-        cosYaw * cosPitch * cosRoll + sinYaw * sinPitch * sinRoll   
+        cosYaw*sinPitch*cosRoll + sinYaw*cosPitch*sinRoll,  
+        sinYaw*cosPitch*cosRoll - cosYaw*sinPitch*sinRoll, 
+        cosYaw*cosPitch*sinRoll - sinYaw*sinPitch*cosRoll, 
+        cosYaw*cosPitch*cosRoll + sinYaw*sinPitch*sinRoll   
     };
 }
 
@@ -257,12 +256,12 @@ Vector3 Vector3Subtract(Vector3 a, Vector3 b)
 
 Vector3 Vector3Multiply(Vector3 a, Vector3 b)
 {
-    return (Vector3){ a.x * b.x, a.y * b.y, a.z * b.z };
+    return (Vector3){ a.x*b.x, a.y*b.y, a.z*b.z };
 }
 
 Vector3 Vector3Multiply(Vector3 v, float scalar)
 {
-    return (Vector3){ v.x * scalar, v.y * scalar, v.z * scalar };
+    return (Vector3){ v.x*scalar, v.y*scalar, v.z*scalar };
 }
 
 Vector3 Vector3Scale(Vector3 v, float scalar)
@@ -313,7 +312,6 @@ Vector3 Vector3RotateByQuaternion(Vector3 v, Quaternion q)
         qv.w*qConjugate.w - qv.x*qConjugate.x - qv.y*qConjugate.y - qv.z*qConjugate.z
     };
 
-    // Return only the vector part of the resulting quaternion
     return (Vector3){ resultQuat.x, resultQuat.y, resultQuat.z };
 }
 
@@ -338,6 +336,8 @@ Camera CreateCamera()
 
     return camera;   
 }
+
+//----------------------------------------------------------------
 
 void DrawModelPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
 {
@@ -378,6 +378,80 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
     }
 }
 
+//----------------------------------------------------------------
+
+//----------------------------------------------------------------
+
+void GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, bool* isDragging)
+{
+    const int max = vector_size(v);
+
+    // Adjust start and end based on scroll input (mouse wheel)
+    if (GetMouseWheelMove() < 0.0f && *end < max)
+    {
+        *start += 1;
+        *end += 1;
+    }
+    if (GetMouseWheelMove() > 0.0f && *start > 0)
+    {
+        *start -= 1;
+        *end -= 1;
+    }
+
+    // Draw dropdown items
+    for (unsigned i = 0, j = *start; i < max && j < *end; i++, j++)
+    {
+        Rectangle itemRec = { rec.x, rec.y + rec.height*i, rec.width, rec.height };
+        GuiButton(itemRec, v[j]);
+    }
+
+    // Draw scrollbar if the number of items exceeds the visible range
+    if (max > 5)
+    {
+        // Scrollbar background
+        Rectangle scrollbarRec = { rec.x + rec.width + 1, rec.y, 10, rec.height*5 };
+        DrawRectangleRec(scrollbarRec, LIGHTGRAY);
+
+        // Calculate the height and position of the scroll thumb
+        float thumbHeight = (5.0f/max)*scrollbarRec.height;
+        float thumbY = scrollbarRec.y + (*start/(float)(max - 5))*(scrollbarRec.height - thumbHeight);
+        
+        Rectangle thumbRec = { scrollbarRec.x, thumbY, scrollbarRec.width, thumbHeight };
+        DrawRectangleRec(thumbRec, DARKGRAY);
+
+        // Handle mouse interaction with scrollbar thumb
+        Vector2 mousePos = GetMousePosition();
+
+        float thumbOffsetY = 0.0f;
+
+        // Start dragging if mouse button is pressed within the thumb
+        if (CheckCollisionPointRec(mousePos, thumbRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            *isDragging = true;
+            thumbOffsetY = mousePos.y - thumbRec.y; // Calculate offset
+        }
+
+        // Update thumb position while dragging
+        if (*isDragging)
+        {
+            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) *isDragging = false; // Stop dragging when mouse button is released
+            
+            float newThumbY = mousePos.y - thumbOffsetY;
+
+            // Clamp the thumb's position within the scrollbar
+            newThumbY = fmax(scrollbarRec.y, fmin(newThumbY, scrollbarRec.y + scrollbarRec.height - thumbHeight));
+
+            // Update the scroll start based on the new thumb position
+            float scrollRatio = (newThumbY - scrollbarRec.y)/(scrollbarRec.height - thumbHeight);
+            *start = round(scrollRatio*(max - 5));
+            *end = *start + 5;
+        }
+    }
+}
+
+//----------------------------------------------------------------
+
+//----------------------------------------------------------------
 bool IsMousePressed()
 {
     return IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsMouseButtonPressed(MOUSE_RIGHT_BUTTON);
@@ -389,6 +463,8 @@ void LoadRobot(bool* flag)
     if (IsKeyPressed(KEY_K)) *flag = true;
 #endif
 }
+
+//----------------------------------------------------------------
 
 int main()
 {
@@ -445,6 +521,10 @@ int main()
     char* animNameOptions = " ";
     int animNameActiveOption = 0;   
     bool animNameDropdownEditMode = false;
+
+    unsigned animDropdownStart = 0;
+    unsigned animDropdownEnd = 5;
+    bool animDropdownIsDragging = false;
 
     bool isPlayAnimation = true;
     float currentFrame = 0.0f;
@@ -712,11 +792,70 @@ int main()
                     currentFrame = 0.0f;
                 }
 
-                animName = (char**)vector_create();
-                model = (Model*)malloc(sizeof(Model));
-                *model = LoadModel(fileNameToLoad);
-                modelAnimation = LoadModelAnimations(fileNameToLoad, &animsCount);
+                if (vector_size(animName) < 8)
+                {
+                    animName = (char**)vector_create();
+                    model = (Model*)malloc(sizeof(Model));
+                    *model = LoadModel(fileNameToLoad);
+                    modelAnimation = LoadModelAnimations(fileNameToLoad, &animsCount);
 
+                    for (unsigned i = 0; i < animsCount; i++)
+                    {
+                        char* name = strdup(modelAnimation[i].name); // Duplicate the string
+                        vector_add(&animName, name); // Add the duplicated name to the vector
+                        
+                        TraceLog(LOG_INFO, "Animation %d: %s", i, name);
+                    }
+
+                    // Calculate the size of the new string
+                    size_t totalLength = 0;
+                    for (unsigned i = 0; i < animsCount; i++)
+                    {
+                        totalLength += strlen(animName[i]);
+                    }
+                    totalLength += animsCount - 1; // For the semicolons
+                    totalLength += 1; // For the null terminator
+
+                    // Allocate memory for the new concatenated string
+                    animNameOptions = (char*)malloc(totalLength * sizeof(char));
+                    
+                    assert(animNameOptions != NULL);
+
+                    strcpy(animNameOptions, animName[0]); // Copy the first name
+
+                    // Concatenate the rest of the names
+                    for (unsigned i = 1; i < animsCount; i++)
+                    {
+                        strcat(animNameOptions, ";");
+                        strcat(animNameOptions, animName[i]);
+                    }
+                }
+            }
+            else
+            {
+                warningMessage = true;
+            }
+
+            fileDialogState.SelectFilePressed = false;
+        }
+
+        if (loadFromKey)
+        {
+            if (model != NULL)
+            {
+                UnloadModel(*model);
+                free(model);
+                vector_free(animName);
+                currentFrame = 0.0f;
+            }
+
+            animName = (char**)vector_create();
+            model = (Model*)malloc(sizeof(Model));
+            *model = LoadModel("./robot.glb");
+            modelAnimation = LoadModelAnimations("./robot.glb", &animsCount);
+
+            if (vector_size(animName) < 8)
+            {
                 for (unsigned i = 0; i < animsCount; i++)
                 {
                     char* name = strdup(modelAnimation[i].name); // Duplicate the string
@@ -747,59 +886,6 @@ int main()
                     strcat(animNameOptions, ";");
                     strcat(animNameOptions, animName[i]);
                 }
-            }
-            else
-            {
-                warningMessage = true;
-            }
-
-            fileDialogState.SelectFilePressed = false;
-        }
-
-        if (loadFromKey)
-        {
-            if (model != NULL)
-            {
-                UnloadModel(*model);
-                free(model);
-                vector_free(animName);
-                currentFrame = 0.0f;
-            }
-
-            animName = (char**)vector_create();
-            model = (Model*)malloc(sizeof(Model));
-            *model = LoadModel("./robot.glb");
-            modelAnimation = LoadModelAnimations("./robot.glb", &animsCount);
-
-            for (unsigned i = 0; i < animsCount; i++)
-            {
-                char* name = strdup(modelAnimation[i].name); // Duplicate the string
-                vector_add(&animName, name); // Add the duplicated name to the vector
-                
-                TraceLog(LOG_INFO, "Animation %d: %s", i, name);
-            }
-
-            // Calculate the size of the new string
-            size_t totalLength = 0;
-            for (unsigned i = 0; i < animsCount; i++)
-            {
-                totalLength += strlen(animName[i]);
-            }
-            totalLength += animsCount - 1; // For the semicolons
-            totalLength += 1; // For the null terminator
-
-            // Allocate memory for the new concatenated string
-            animNameOptions = (char*)malloc(totalLength * sizeof(char));
-            
-            assert(animNameOptions != NULL);
-
-            strcpy(animNameOptions, animName[0]); // Copy the first name
-
-            // Concatenate the rest of the names
-            for (unsigned i = 1; i < animsCount; i++)
-            {
-                strcat(animNameOptions, ";");
-                strcat(animNameOptions, animName[i]);
             }
 
             loadFromKey = false;
@@ -1029,40 +1115,58 @@ int main()
         if (!maxSclDropdownEditMode && !targetFPSDropdownEditMode)
         {
             GuiDrawText("Current Animation:", (Rectangle){ uiSettingsLeft + 10, 410 + 50, 100, 20 }, 0, GRAY);
-            
-            // Draw the dropdown box
-            GuiDropdownBox((Rectangle){ uiSettingsLeft + 40, 480, 100, 20 }, animNameOptions, &animNameActiveOption, animNameDropdownEditMode);
 
-            // Check if dropdown box is in edit mode (expanded)
-            if (animNameDropdownEditMode)
+            if (vector_size(animName) < 8)
             {
-                animNameDropdownEditMode = !IsMousePressed();
-
-                // Check for clicks on each option when expanded
-                for (unsigned i = 0; i < animsCount; i++)
+                // Draw the dropdown box
+                GuiDropdownBox(
+                    (Rectangle){ uiSettingsLeft + 40, 480, 100, 20 }, 
+                    animNameOptions, 
+                    &animNameActiveOption, 
+                    animNameDropdownEditMode
+                );
+                
+                // Check if dropdown box is in edit mode (expanded)
+                if (animNameDropdownEditMode)
                 {
-                    // Calculate the rectangle for each dropdown option
-                    Rectangle optionRect = { uiSettingsLeft + 40, 480 + 20 * (i + 1), 100, 20 };
+                    animNameDropdownEditMode = !IsMousePressed();
 
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                        CheckCollisionPointRec(GetMousePosition(), optionRect))
+                    // Check for clicks on each option when expanded
+                    for (unsigned i = 0; i < animsCount; i++)
                     {
-                        // Set active option based on which one was clicked
-                        animNameActiveOption = i;
-                        animNameDropdownEditMode = false;  // Close the dropdown
-                        animIndex = i;
-                        break;
+                        // Calculate the rectangle for each dropdown option
+                        Rectangle optionRect = { uiSettingsLeft + 40, 480 + 20 * (i + 1), 100, 20 };
+
+                        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                            CheckCollisionPointRec(GetMousePosition(), optionRect))
+                        {
+                            // Set active option based on which one was clicked
+                            animNameActiveOption = i;
+                            animNameDropdownEditMode = false;  // Close the dropdown
+                            animIndex = i;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Toggle dropdown edit mode when clicking the top rectangle (collapsed dropdown)
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                        CheckCollisionPointRec(GetMousePosition(), (Rectangle){ uiSettingsLeft + 40, 480, 100, 20 }))
+                    {
+                        animNameDropdownEditMode = !animNameDropdownEditMode;  // Open dropdown
                     }
                 }
             }
             else
             {
-                // Toggle dropdown edit mode when clicking the top rectangle (collapsed dropdown)
-                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                    CheckCollisionPointRec(GetMousePosition(), (Rectangle){ uiSettingsLeft + 40, 480, 100, 20 }))
-                {
-                    animNameDropdownEditMode = !animNameDropdownEditMode;  // Open dropdown
-                }
+                GuiDropdownPro(
+                    (Rectangle){ uiSettingsLeft + 40, 480, 100, 20 }, 
+                    animName, 
+                    &animDropdownStart, 
+                    &animDropdownEnd, 
+                    &animDropdownIsDragging
+                );
             }
         }
 
