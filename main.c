@@ -416,6 +416,8 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
 
     Rectangle editModeRec = { rec.x, rec.y + rec.height, rec.width + 11, rec.height*5 };
 
+    bool result = true;
+
     // Draw scrollbar if the number of items exceeds the visible range
     if (max > 5)
     {
@@ -441,8 +443,6 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
             *isDragging = true;
             thumbOffsetY = mousePos.y - thumbRec.y; // Calculate offset
         }
-
-        bool result = true;
 
         // Update thumb position while dragging
         if (*isDragging)
@@ -483,9 +483,9 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
 
         // Debug rec
         //DrawRectangleRec(editModeRec, RED);
-
-        return result;
     }
+
+    return result;
 }
 
 //----------------------------------------------------------------
@@ -506,7 +506,7 @@ int main()
     /* Window */
     
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    InitWindow(screenWidth, screenHeight, "GLB Viewer");
+    InitWindow(screenWidth, screenHeight, "GLTF Viewer");
     SetTargetFPS(60);
     SetExitKey(0);
 
@@ -816,89 +816,100 @@ int main()
         if (fileDialogState.SelectFilePressed)
         {
             // Load model file (if supported extension)
-            if (IsFileExtension(fileDialogState.fileNameText, ".glb"))
+            if (IsFileExtension(fileDialogState.fileNameText, ".glb") || IsFileExtension(fileDialogState.fileNameText, ".gltf"))
             {
                 strcpy(fileNameToLoad, TextFormat("%s" PATH_SEPERATOR "%s", fileDialogState.dirPathText, fileDialogState.fileNameText));
                 
                 if (model != NULL)
                 {
+                    if (animsCount > 0)
+                    {
+                        UnloadModelAnimations(modelAnimation, animsCount);
+                        free(animNameOptions);
+                        vector_free(animName);
+                    }
+                    
                     UnloadModel(*model);
                     free(model);
-                    vector_free(animName);
+
                     currentFrame = 0.0f;
                     animNameOptions = " ";
                     animNameActiveOption = 0; 
+                    animsCount = 0;
                 }
 
-                if (vector_size(animName) < 8)
+                animName = (char**)vector_create();
+                model = (Model*)malloc(sizeof(Model));
+                *model = LoadModel(fileNameToLoad);
+                modelAnimation = LoadModelAnimations(fileNameToLoad, &animsCount);
+
+                if (animsCount > 0)
                 {
-                    animName = (char**)vector_create();
-                    model = (Model*)malloc(sizeof(Model));
-                    *model = LoadModel(fileNameToLoad);
-                    modelAnimation = LoadModelAnimations(fileNameToLoad, &animsCount);
-
-                    for (unsigned i = 0; i < animsCount; i++)
+                    if (vector_size(animName) < 8)
                     {
-                        char* name = strdup(modelAnimation[i].name); // Duplicate the string
-                        vector_add(&animName, name); // Add the duplicated name to the vector
+                        for (unsigned i = 0; i < animsCount; i++)
+                        {
+                            char* name = strdup(modelAnimation[i].name); // Duplicate the string
+                            vector_add(&animName, name); // Add the duplicated name to the vector
+                            
+                            TraceLog(LOG_INFO, "Animation %d: %s", i, name);
+                        }
+
+                        // Calculate the size of the new string
+                        size_t totalLength = 0;
+                        for (unsigned i = 0; i < animsCount; i++)
+                        {
+                            totalLength += strlen(animName[i]);
+                        }
+                        totalLength += animsCount - 1; // For the semicolons
+                        totalLength += 1; // For the null terminator
+
+                        // Allocate memory for the new concatenated string
+                        animNameOptions = (char*)malloc(totalLength * sizeof(char));
                         
-                        TraceLog(LOG_INFO, "Animation %d: %s", i, name);
+                        assert(animNameOptions != NULL);
+
+                        strcpy(animNameOptions, animName[0]); // Copy the first name
+
+                        // Concatenate the rest of the names
+                        for (unsigned i = 1; i < animsCount; i++)
+                        {
+                            strcat(animNameOptions, ";");
+                            strcat(animNameOptions, animName[i]);
+                        }
                     }
-
-                    // Calculate the size of the new string
-                    size_t totalLength = 0;
-                    for (unsigned i = 0; i < animsCount; i++)
+                    else
                     {
-                        totalLength += strlen(animName[i]);
-                    }
-                    totalLength += animsCount - 1; // For the semicolons
-                    totalLength += 1; // For the null terminator
+                        for (unsigned i = 0; i < animsCount; i++)
+                        {
+                            char* name = strdup(modelAnimation[i].name); // Duplicate the string
+                            vector_add(&animNameSlice, name); // Add the duplicated name to the vector
+                            
+                            TraceLog(LOG_INFO, "Animation %d: %s", i, name);
+                        }
 
-                    // Allocate memory for the new concatenated string
-                    animNameOptions = (char*)malloc(totalLength * sizeof(char));
-                    
-                    assert(animNameOptions != NULL);
+                        // Calculate the size of the new string
+                        size_t totalLength = 0;
+                        for (unsigned i = 0; i < animsCount; i++)
+                        {
+                            totalLength += strlen(animNameSlice[i]);
+                        }
+                        totalLength += animsCount - 1; // For the semicolons
+                        totalLength += 1; // For the null terminator
 
-                    strcpy(animNameOptions, animName[0]); // Copy the first name
-
-                    // Concatenate the rest of the names
-                    for (unsigned i = 1; i < animsCount; i++)
-                    {
-                        strcat(animNameOptions, ";");
-                        strcat(animNameOptions, animName[i]);
-                    }
-                }
-                else
-                {
-                    for (unsigned i = 0; i < animsCount; i++)
-                    {
-                        char* name = strdup(modelAnimation[i].name); // Duplicate the string
-                        vector_add(&animNameSlice, name); // Add the duplicated name to the vector
+                        // Allocate memory for the new concatenated string
+                        animNameOptions = (char*)malloc(totalLength * sizeof(char));
                         
-                        TraceLog(LOG_INFO, "Animation %d: %s", i, name);
-                    }
+                        assert(animNameOptions != NULL);
 
-                    // Calculate the size of the new string
-                    size_t totalLength = 0;
-                    for (unsigned i = 0; i < animsCount; i++)
-                    {
-                        totalLength += strlen(animNameSlice[i]);
-                    }
-                    totalLength += animsCount - 1; // For the semicolons
-                    totalLength += 1; // For the null terminator
+                        strcpy(animNameOptions, animNameSlice[0]); // Copy the first name
 
-                    // Allocate memory for the new concatenated string
-                    animNameOptions = (char*)malloc(totalLength * sizeof(char));
-                    
-                    assert(animNameOptions != NULL);
-
-                    strcpy(animNameOptions, animNameSlice[0]); // Copy the first name
-
-                    // Concatenate the rest of the names
-                    for (unsigned i = 1; i < animsCount; i++)
-                    {
-                        strcat(animNameOptions, ";");
-                        strcat(animNameOptions, animNameSlice[i]);
+                        // Concatenate the rest of the names
+                        for (unsigned i = 1; i < animsCount; i++)
+                        {
+                            strcat(animNameOptions, ";");
+                            strcat(animNameOptions, animNameSlice[i]);
+                        }
                     }
                 }
             }
@@ -914,12 +925,20 @@ int main()
         {
             if (model != NULL)
             {
+                if (animsCount > 0)
+                {
+                    UnloadModelAnimations(modelAnimation, animsCount);
+                    free(animNameOptions);
+                    vector_free(animName);
+                }
+                
                 UnloadModel(*model);
                 free(model);
-                vector_free(animName);
+
                 currentFrame = 0.0f;
                 animNameOptions = " ";
                 animNameActiveOption = 0; 
+                animsCount = 0;
             }
 
             animName = (char**)vector_create();
@@ -1017,7 +1036,18 @@ int main()
             if (isDrawWires)
             {
                 DrawModelWiresPro(*model, modelPos, modelRot, modelScl);
-                DrawModelBones(*model, modelAnimation, animIndex, animCurrentFrame, modelPos, modelRot, modelScl);
+                if (animsCount > 0)
+                {
+                    DrawModelBones(
+                        *model, 
+                        modelAnimation, 
+                        animIndex, 
+                        animCurrentFrame, 
+                        modelPos, 
+                        modelRot, 
+                        modelScl
+                    );
+                }
             }
             else
             {
@@ -1324,46 +1354,49 @@ int main()
         }
 
         //----------------------------------------------------------------
-        if (model != NULL)
+        if (animsCount > 0)
         {
-            const ModelAnimation anim = modelAnimation[animIndex];
-
-            if (isPlayAnimation)
+            if (model != NULL)
             {
-                if (anim.frameCount > 0)
+                const ModelAnimation anim = modelAnimation[animIndex];
+
+                if (isPlayAnimation)
                 {
-                    animCurrentFrame = (animCurrentFrame + 1) % anim.frameCount;
-                    UpdateModelAnimation(*model, anim, animCurrentFrame);
+                    if (anim.frameCount > 0)
+                    {
+                        animCurrentFrame = (animCurrentFrame + 1) % anim.frameCount;
+                        UpdateModelAnimation(*model, anim, animCurrentFrame);
+                    }
+                    else
+                    {
+                        animCurrentFrame = 0;
+                    }
+
+                    currentFrame = animCurrentFrame;
                 }
                 else
                 {
-                    animCurrentFrame = 0;
+                    animCurrentFrame = (unsigned)currentFrame;
+                    UpdateModelAnimation(*model, anim, animCurrentFrame);
                 }
-
-                currentFrame = animCurrentFrame;
-            }
-            else
-            {
-                animCurrentFrame = (unsigned)currentFrame;
-                UpdateModelAnimation(*model, anim, animCurrentFrame);
-            }
-            
-            //----------------------------------------------------------------
-            if (!maxSclDropdownEditMode && !targetFPSDropdownEditMode && !animNameDropdownEditMode)
-            {
-                GuiSliderBar(
-                    (Rectangle){ 50, screenHeight - 80, 900, 35 }, 
-                    "Frame:", 
-                    TextFormat("%3.2f", currentFrame), 
-                    &currentFrame, 
-                    0, 
-                    anim.frameCount
-                );
-
-                if (GuiButton((Rectangle){ screenWidth - 90, screenHeight - 80, 75, 30 }, 
-                    (isPlayAnimation) ? GuiIconText(ICON_PLAYER_PAUSE, "PAUSE") : GuiIconText(ICON_PLAYER_PLAY, "PLAY")))
+                
+                //----------------------------------------------------------------
+                if (!maxSclDropdownEditMode && !targetFPSDropdownEditMode && !animNameDropdownEditMode)
                 {
-                    isPlayAnimation = !isPlayAnimation;
+                    GuiSliderBar(
+                        (Rectangle){ 50, screenHeight - 80, 900, 35 }, 
+                        "Frame:", 
+                        TextFormat("%3.2f", currentFrame), 
+                        &currentFrame, 
+                        0, 
+                        anim.frameCount
+                    );
+
+                    if (GuiButton((Rectangle){ screenWidth - 90, screenHeight - 80, 75, 30 }, 
+                        (isPlayAnimation) ? GuiIconText(ICON_PLAYER_PAUSE, "PAUSE") : GuiIconText(ICON_PLAYER_PLAY, "PLAY")))
+                    {
+                        isPlayAnimation = !isPlayAnimation;
+                    }
                 }
             }
         }
@@ -1405,11 +1438,15 @@ int main()
     //----------------------------------------------------------------
     if (model != NULL)
     {
-        UnloadModelAnimations(modelAnimation, animsCount);
+        if (animsCount > 0)
+        {
+            UnloadModelAnimations(modelAnimation, animsCount);
+            free(animNameOptions);
+            vector_free(animName);
+        }
+
         UnloadModel(*model);
         free(model);
-        free(animNameOptions);
-        vector_free(animName);
     }
 
     CloseWindow();
