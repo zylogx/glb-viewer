@@ -21,6 +21,7 @@
 
 #include "raylib.h"
 #include "assert.h"
+#include "custom_color.h"
 #include "vec.h"
 
 #define RAYGUI_IMPLEMENTATION
@@ -393,7 +394,7 @@ bool IsMousePressed()
     return IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsMouseButtonPressed(MOUSE_RIGHT_BUTTON);
 }
 
-bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, bool* isDragging, unsigned* index)
+bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, bool* isDragging, unsigned* index, ScrollbarColor* color)
 {
     const unsigned max = vector_size(v);
 
@@ -418,17 +419,40 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
     {
         // Scrollbar background
         Rectangle scrollbarRec = { rec.x + rec.width + 1, rec.y + rec.height, 10, rec.height*5 };
-        DrawRectangleRec(scrollbarRec, LIGHTGRAY);
+        DrawRectangleRec(scrollbarRec, color->backgroundColor);
 
         // Calculate the height and position of the scroll thumb
         float thumbHeight = (5.0f/max)*scrollbarRec.height;
         float thumbY = scrollbarRec.y + (*start/(float)(max - 5))*(scrollbarRec.height - thumbHeight);
-        
-        Rectangle thumbRec = { scrollbarRec.x, thumbY, scrollbarRec.width, thumbHeight };
-        DrawRectangleRec(thumbRec, DARKGRAY);
 
-        // Handle mouse interaction with scrollbar thumb
         Vector2 mousePos = GetMousePosition();
+
+        Rectangle thumbRec = { scrollbarRec.x, thumbY, scrollbarRec.width, thumbHeight };
+        bool isHovering = CheckCollisionPointRec(mousePos, thumbRec);
+
+        if (isHovering && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+        {
+            color->isDragging = true;
+        }
+        else if (color->isDragging && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) 
+        {
+            color->isDragging = false;
+        }
+
+        if (isHovering && color->isDragging) 
+        {
+            color->currentThumbColor = color->draggedColor;
+        }
+        else if (isHovering) 
+        {
+            color->currentThumbColor = color->hoverColor;
+        }
+        else if (!isHovering && !color->isDragging)
+        {
+            color->currentThumbColor = color->idleColor;
+        }
+        
+        DrawRectangleRec(thumbRec, color->currentThumbColor);
 
         float thumbOffsetY = 0.0f;
 
@@ -559,6 +583,13 @@ int main()
 
     bool isPlayAnimation = true;
     float currentFrame = 0.0f;
+
+    ScrollbarColor animScrollbarColor = { 0 };
+    
+    animScrollbarColor.idleColor = DARKGRAY;
+    animScrollbarColor.hoverColor = CBLUE;
+    animScrollbarColor.draggedColor = DBLUE;
+    animScrollbarColor.backgroundColor = LIGHTGRAY;
 
     //----------------------------------------------------------------
     float lastX = GetMouseX();
@@ -1300,7 +1331,8 @@ int main()
                         &animDropdownStart, 
                         &animDropdownEnd, 
                         &animDropdownIsDragging,
-                        &animIndex
+                        &animIndex,
+                        &animScrollbarColor 
                     );
 
                     // If mouse is pressed and not in drag mode, set edit mode to false
