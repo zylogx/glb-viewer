@@ -268,11 +268,6 @@ Vector3 Vector3Multiply(Vector3 a, Vector3 b)
     return (Vector3){ a.x*b.x, a.y*b.y, a.z*b.z };
 }
 
-Vector3 Vector3Multiply(Vector3 v, float scalar)
-{
-    return (Vector3){ v.x*scalar, v.y*scalar, v.z*scalar };
-}
-
 Vector3 Vector3Scale(Vector3 v, float scalar)
 {
     return (Vector3){ v.x*scalar, v.y*scalar, v.z*scalar };
@@ -373,7 +368,7 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
         Vector3 finalTranslation = Vector3Transform(Vector3Multiply(translation, scl), rotationMatrix);
         finalTranslation = Vector3Add(finalTranslation, pos); // Final transformed position
 
-        DrawCubeV(finalTranslation, Vector3Multiply(scl, 0.1f), GREEN);
+        DrawCubeV(finalTranslation, Vector3Scale(scl, 0.1f), GREEN);
 
         int parentIndex = anims[animIndex].bones[i].parent;
         if (parentIndex >= 0)
