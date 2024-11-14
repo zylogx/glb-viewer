@@ -358,7 +358,7 @@ void DrawModelWiresPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
     DrawModelWires(model, Vector3Zero(), 1.0f, WHITE);
 }
 
-void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl)
+void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl, bool isDrawCircles, bool isDrawCubes)
 {
     Matrix rotationMatrix = MatrixRotateV(rot);
 
@@ -369,7 +369,16 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
         Vector3 finalTranslation = Vector3Transform(Vector3Multiply(translation, scl), rotationMatrix);
         finalTranslation = Vector3Add(finalTranslation, pos); // Final transformed position
 
-        DrawCubeV(finalTranslation, Vector3Scale(scl, 0.1f), GREEN);
+        if (isDrawCubes)
+        {
+            DrawCubeV(finalTranslation, Vector3Scale(scl, 0.1f), GREEN);
+        }
+
+        if (isDrawCircles)
+        {
+            float radius = (scl.x + scl.y + scl.z)/3.0f*0.1f;
+            DrawCircle3D(finalTranslation, radius, (Vector3){ 90.0f, 0.0f, 0.0f }, 130.0f, LIME);
+        }
 
         int parentIndex = anims[animIndex].bones[i].parent;
         if (parentIndex >= 0)
@@ -590,6 +599,10 @@ int main()
     animScrollbarColor.hoverColor = CBLUE;
     animScrollbarColor.draggedColor = DBLUE;
     animScrollbarColor.backgroundColor = LIGHTGRAY;
+
+    bool isAnimDrawCubes = true;
+    bool isAnimDrawCircles = true;
+    bool isAnimDrawMainWires = true;
 
     //----------------------------------------------------------------
     float lastX = GetMouseX();
@@ -1061,7 +1074,11 @@ int main()
         {
             if (isDrawWires)
             {
-                DrawModelWiresPro(*model, modelPos, modelRot, modelScl);
+                if (isAnimDrawMainWires)
+                {
+                    DrawModelWiresPro(*model, modelPos, modelRot, modelScl);
+                }
+
                 if (animsCount > 0)
                 {
                     DrawModelBones(
@@ -1071,7 +1088,9 @@ int main()
                         animCurrentFrame, 
                         modelPos, 
                         modelRot, 
-                        modelScl
+                        modelScl,
+                        isAnimDrawCircles,
+                        isAnimDrawCubes
                     );
                 }
             }
@@ -1095,7 +1114,7 @@ int main()
 
         /* Transform */
 
-        const float uiTranformsLeft = screenWidth - 200;
+        const int uiTranformsLeft = screenWidth - 200;
         GuiGroupBox((Rectangle){ uiTranformsLeft, 20, 180, 300 }, "Transform");
 
         //----------------------------------------------------------------
@@ -1190,7 +1209,7 @@ int main()
 
         /* Settings */
 
-        const float uiSettingsLeft = screenWidth - 200;
+        const int uiSettingsLeft = screenWidth - 200;
         GuiGroupBox((Rectangle){ uiSettingsLeft, 350, 180, 220 }, "Settings");
 
         GuiDrawText("Max Scale:", (Rectangle){ uiSettingsLeft + 10, 360, 100, 20 }, 0, GRAY);
@@ -1377,6 +1396,33 @@ int main()
                 (Rectangle){ uiSettingsLeft + 10, 520, 15, 15 }, 
                 "Draw Wires",
                 &isDrawWires
+            );
+        }
+
+        /* Bones View Settings */
+
+        //----------------------------------------------------------------
+        if (isDrawWires)
+        {
+            const int bonesViewSettingsLeft = 20;
+            GuiGroupBox((Rectangle){ bonesViewSettingsLeft, 100, 120, 70 }, "Bone View Settings");
+
+            GuiCheckBox(
+                (Rectangle){ bonesViewSettingsLeft + 4, 110, 15, 15 }, 
+                "Draw Cubes",
+                &isAnimDrawCubes
+            );
+
+            GuiCheckBox(
+                (Rectangle){ bonesViewSettingsLeft + 4, 130, 15, 15 }, 
+                "Draw Circles",
+                &isAnimDrawCircles
+            );
+
+            GuiCheckBox(
+                (Rectangle){ bonesViewSettingsLeft + 4, 150, 15, 15 }, 
+                "Draw Main Wires",
+                &isAnimDrawMainWires
             );
         }
 
