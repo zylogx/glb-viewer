@@ -358,7 +358,32 @@ void DrawModelWiresPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
     DrawModelWires(model, Vector3Zero(), 1.0f, WHITE);
 }
 
-void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl, bool isDrawCircles, bool isDrawCubes)
+void DrawTransform(Vector3 pos, Vector3 rot, Vector3 scl)
+{
+    Matrix rotMatrix = MatrixRotateXYZ(rot);
+
+    float fScl = (scl.x + scl.y + scl.z)/3*0.1f;
+  
+    DrawLine3D(
+        pos,
+        Vector3Add(pos, (Vector3){ fScl*rotMatrix.m0, fScl*rotMatrix.m1, fScl*rotMatrix.m2 }),
+        RED
+    );
+        
+    DrawLine3D(
+        pos,
+        Vector3Add(pos, (Vector3){ fScl*rotMatrix.m4, fScl*rotMatrix.m5, fScl*rotMatrix.m6 }),
+        GREEN
+    );
+        
+    DrawLine3D(
+        pos,
+        Vector3Add(pos, (Vector3){ fScl*rotMatrix.m8, fScl*rotMatrix.m9, fScl*rotMatrix.m10 }),
+        BLUE
+    );
+}
+
+void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl, bool isDrawCircles, bool isDrawCubes, bool isDrawAnimTransform)
 {
     Matrix rotationMatrix = MatrixRotateV(rot);
 
@@ -378,6 +403,11 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
         {
             float radius = (scl.x + scl.y + scl.z)/3.0f*0.1f;
             DrawCircle3D(finalTranslation, radius, (Vector3){ 90.0f, 0.0f, 0.0f }, 130.0f, LIME);
+        }
+
+        if (isDrawAnimTransform)
+        {
+            DrawTransform(finalTranslation, rot, scl);
         }
 
         int parentIndex = anims[animIndex].bones[i].parent;
@@ -625,6 +655,7 @@ int main()
     bool isAnimDrawCubes = true;
     bool isAnimDrawCircles = true;
     bool isAnimDrawMainWires = true;
+    bool isDrawAnimTransform = true;
 
     //----------------------------------------------------------------
     float lastX = GetMouseX();
@@ -1104,7 +1135,8 @@ int main()
                         modelRot, 
                         modelScl,
                         isAnimDrawCircles,
-                        isAnimDrawCubes
+                        isAnimDrawCubes, 
+                        isDrawAnimTransform
                     );
                 }
             }
@@ -1411,7 +1443,7 @@ int main()
         if (isDrawWires)
         {
             const int bonesViewSettingsLeft = 20;
-            GuiGroupBox((Rectangle){ bonesViewSettingsLeft, 100, 120, 70 }, "Bone View Settings");
+            GuiGroupBox((Rectangle){ bonesViewSettingsLeft, 100, 120, 90 }, "Bone View Settings");
 
             GuiCheckBox(
                 (Rectangle){ bonesViewSettingsLeft + 4, 110, 15, 15 }, 
@@ -1429,6 +1461,12 @@ int main()
                 (Rectangle){ bonesViewSettingsLeft + 4, 150, 15, 15 }, 
                 "Draw Main Wires",
                 &isAnimDrawMainWires
+            );
+
+            GuiCheckBox(
+                (Rectangle){ bonesViewSettingsLeft + 4, 170, 15, 15 }, 
+                "Draw Transform",
+                &isDrawAnimTransform
             );
         }
 
