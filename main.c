@@ -1399,7 +1399,7 @@ int main()
             );
         }
 
-        /* Bones View Settings */
+        /* Bone View Settings */
 
         //----------------------------------------------------------------
         if (isDrawWires)
@@ -1495,7 +1495,7 @@ int main()
             int result = GuiMessageBox(
                 (Rectangle){ screenWidth/2 - 100, screenHeight/2 - 100, 250, 100 },
                     "#191#Message Box", 
-                    "The file should be a .glb file.", 
+                    "The file should be a .glb or .gltf file.", 
                     "OK"
             );
             
