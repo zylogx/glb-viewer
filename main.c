@@ -394,6 +394,30 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
     }
 }
 
+void DrawGizmo(Vector3* modelPos, Vector3* posX, Vector3* posY, Vector3* posZ, float size, bool colors[3], bool isGizmoMode)
+{
+    if (isGizmoMode)
+    {
+        *modelPos = (Vector3){ posX->x - size, posX->y, posX->z };
+    }
+    else
+    {
+        *posX = (Vector3){ modelPos->x + size, modelPos->y, modelPos->z };
+        *posY = (Vector3){ modelPos->x, modelPos->y + size, modelPos->z };
+        *posZ = (Vector3){ modelPos->x, modelPos->y, modelPos->z + size };
+    }    
+
+    DrawLine3D((Vector3){ posX->x - size, posX->y, posX->z }, *posX, (colors[0]) ? RED : MAROON);
+    DrawLine3D((Vector3){ posY->x, posY->y - size, posY->z }, *posY, (colors[1]) ? GREEN : DARKGREEN);
+    DrawLine3D((Vector3){ posZ->x, posZ->y, posZ->z - size }, *posZ, (colors[2]) ? BLUE : DARKBLUE);
+
+    Vector3 gizmoCubeSize = (Vector3){ size*0.05f, size*0.05f, size*0.05f };
+
+    DrawCubeV(*posX, gizmoCubeSize, (colors[0]) ? RED : MAROON);
+    DrawCubeV(*posY, gizmoCubeSize, (colors[1]) ? GREEN : DARKGREEN);
+    DrawCubeV(*posZ, gizmoCubeSize, (colors[2]) ? BLUE : DARKBLUE);
+}
+
 //----------------------------------------------------------------
 
 //----------------------------------------------------------------
@@ -420,8 +444,6 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
     }
 
     Rectangle editModeRec = { rec.x, rec.y + rec.height, rec.width + 11, rec.height*5 };
-
-    bool result = true;
 
     // Draw scrollbar if the number of items exceeds the visible range
     if (max > 5)
@@ -513,7 +535,7 @@ bool GuiDropdownPro(Rectangle rec, char** v, unsigned* start, unsigned* end, boo
         //DrawRectangleRec(editModeRec, RED);
     }
 
-    return result;
+    return true;
 }
 
 //----------------------------------------------------------------
@@ -835,17 +857,6 @@ int main()
         lastX = currentX; // Update lastX to current position
         lastY = currentY; // Update lastY to current position
 
-        if (isGizmoMod)
-        {
-            modelPos = (Vector3){ gizmoX.x - 4, gizmoX.y, gizmoX.z };
-        }
-        else
-        {
-            gizmoX = (Vector3){ modelPos.x + 4.0f, modelPos.y, modelPos.z };
-            gizmoY = (Vector3){ modelPos.x, modelPos.y + 4.0f, modelPos.z };
-            gizmoZ = (Vector3){ modelPos.x, modelPos.y, modelPos.z + 4.0f };
-        }
-
         //----------------------------------------------------------------
                             /* Load model button */
         //----------------------------------------------------------------
@@ -1069,6 +1080,9 @@ int main()
         BeginMode3D(camera);
         ClearBackground(BLACK);
         DrawGrid(40, 1.0f);
+
+        float gizmoSize = gizmoRad*10.0f - 1.0f;
+        DrawGizmo(&modelPos, &gizmoX, &gizmoY, &gizmoZ, gizmoSize, gizmoXYZColors, isGizmoMod);
         
         if (model != NULL)
         {
@@ -1099,16 +1113,6 @@ int main()
                 DrawModelPro(*model, modelPos, modelRot, modelScl);
             }
         }
-
-        DrawLine3D((Vector3){ gizmoX.x - 4, gizmoX.y, gizmoX.z }, gizmoX, (gizmoXYZColors[0]) ? RED : MAROON);
-        DrawLine3D((Vector3){ gizmoY.x, gizmoY.y - 4, gizmoY.z }, gizmoY, (gizmoXYZColors[1]) ? GREEN : DARKGREEN);
-        DrawLine3D((Vector3){ gizmoZ.x, gizmoZ.y, gizmoZ.z - 4 }, gizmoZ, (gizmoXYZColors[2]) ? BLUE : DARKBLUE);
-
-        Vector3 gizmoCubeSize = (Vector3){ gizmoRad * 0.2f, gizmoRad * 0.2f, gizmoRad * 0.2f };
-
-        DrawCubeV(gizmoX, gizmoCubeSize, (gizmoXYZColors[0]) ? RED : MAROON);
-        DrawCubeV(gizmoY, gizmoCubeSize, (gizmoXYZColors[1]) ? GREEN : DARKGREEN);
-        DrawCubeV(gizmoZ, gizmoCubeSize, (gizmoXYZColors[2]) ? BLUE : DARKBLUE);
 
         EndMode3D();
 
