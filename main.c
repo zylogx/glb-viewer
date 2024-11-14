@@ -1104,9 +1104,11 @@ int main()
         DrawLine3D((Vector3){ gizmoY.x, gizmoY.y - 4, gizmoY.z }, gizmoY, (gizmoXYZColors[1]) ? GREEN : DARKGREEN);
         DrawLine3D((Vector3){ gizmoZ.x, gizmoZ.y, gizmoZ.z - 4 }, gizmoZ, (gizmoXYZColors[2]) ? BLUE : DARKBLUE);
 
-        DrawSphere(gizmoX, gizmoRad * 0.2f, (gizmoXYZColors[0]) ? RED : MAROON);
-        DrawSphere(gizmoY, gizmoRad * 0.2f, (gizmoXYZColors[1]) ? GREEN : DARKGREEN);
-        DrawSphere(gizmoZ, gizmoRad * 0.2f, (gizmoXYZColors[2]) ? BLUE : DARKBLUE);
+        Vector3 gizmoCubeSize = (Vector3){ gizmoRad * 0.2f, gizmoRad * 0.2f, gizmoRad * 0.2f };
+
+        DrawCubeV(gizmoX, gizmoCubeSize, (gizmoXYZColors[0]) ? RED : MAROON);
+        DrawCubeV(gizmoY, gizmoCubeSize, (gizmoXYZColors[1]) ? GREEN : DARKGREEN);
+        DrawCubeV(gizmoZ, gizmoCubeSize, (gizmoXYZColors[2]) ? BLUE : DARKBLUE);
 
         EndMode3D();
 
