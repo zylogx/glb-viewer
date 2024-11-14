@@ -360,7 +360,7 @@ void DrawModelWiresPro(Model model, Vector3 pos, Vector3 rot, Vector3 scl)
 
 void DrawTransform(Vector3 pos, Vector3 rot, Vector3 scl)
 {
-    Matrix rotMatrix = MatrixRotateXYZ(rot);
+    Matrix rotMatrix = MatrixRotateV(rot);
 
     float fScl = (scl.x + scl.y + scl.z)/3*0.1f;
   
@@ -385,13 +385,13 @@ void DrawTransform(Vector3 pos, Vector3 rot, Vector3 scl)
 
 void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl, bool isDrawCircles, bool isDrawCubes, bool isDrawAnimTransform)
 {
-    Matrix rotationMatrix = MatrixRotateV(rot);
+    Matrix rotMatrix = MatrixRotateV(rot);
 
     for (unsigned i = 0; i < model.boneCount-1; i++)
     {
         // Get the current bone translation and apply scaling
         Vector3 translation = anims[animIndex].framePoses[animCurrentFrame][i].translation;
-        Vector3 finalTranslation = Vector3Transform(Vector3Multiply(translation, scl), rotationMatrix);
+        Vector3 finalTranslation = Vector3Transform(Vector3Multiply(translation, scl), rotMatrix);
         finalTranslation = Vector3Add(finalTranslation, pos); // Final transformed position
 
         if (isDrawCubes)
@@ -415,7 +415,7 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
         {
             // Get the parent's translation and apply transformations
             Vector3 parentTranslation = anims[animIndex].framePoses[animCurrentFrame][parentIndex].translation;
-            Vector3 parentFinalTranslation = Vector3Transform(Vector3Multiply(parentTranslation, scl), rotationMatrix);
+            Vector3 parentFinalTranslation = Vector3Transform(Vector3Multiply(parentTranslation, scl), rotMatrix);
             parentFinalTranslation = Vector3Add(parentFinalTranslation, pos); // Final transformed position for parent
 
             // Draw a line between the bone and its parent
