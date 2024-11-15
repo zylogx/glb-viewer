@@ -710,22 +710,22 @@ int main()
         Ray ray = GetMouseRay(mousePosition, camera);
 
         /*
-        * Gizmo sphere x
+        * Gizmo point x
         */
 
-        Vector3 toSphereX = Vector3Subtract(gizmoX, ray.position);
-        float projectionX = Vector3DotProduct(ray.direction, toSphereX);
+        Vector3 toPointX = Vector3Subtract(gizmoX, ray.position);
+        float projectionX = Vector3DotProduct(ray.direction, toPointX);
 
         if (projectionX < 0)
         {
             projectionX = 0;
         }
 
-        // Find the closest point on the ray to the sphere center
+        // Find the closest point on the ray to the point center
         Vector3 closestPointX = Vector3Add(ray.position, Vector3Scale(ray.direction, projectionX));
         float distanceX = Vector3Distance(closestPointX, gizmoX);
 
-        // Check if the mouse is touching the sphere
+        // Check if the mouse is touching the point
         if (distanceX <= gizmoRad && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             isGizmoMod = true;
@@ -767,22 +767,22 @@ int main()
         }
 
         /*
-        * Gizmo sphere y
+        * Gizmo point y
         */
 
-        Vector3 toSphereY = Vector3Subtract(gizmoY, ray.position);
-        float projectionY = Vector3DotProduct(ray.direction, toSphereY);
+        Vector3 toPointY = Vector3Subtract(gizmoY, ray.position);
+        float projectionY = Vector3DotProduct(ray.direction, toPointY);
 
         if (projectionY < 0)
         {
             projectionY = 0;
         }
 
-        // Find the closest point on the ray to the sphere center
+        // Find the closest point on the ray to the point center
         Vector3 closestPointY = Vector3Add(ray.position, Vector3Scale(ray.direction, projectionY));
         float distanceY = Vector3Distance(closestPointY, gizmoY);
 
-        // Check if the mouse is touching the sphere
+        // Check if the mouse is touching the point
         if (distanceY <= gizmoRad && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             isGizmoMod = true;
@@ -805,22 +805,22 @@ int main()
         }
 
         /*
-        * Gizmo sphere z
+        * Gizmo point z
         */
 
-        Vector3 toSphereZ = Vector3Subtract(gizmoZ, ray.position);
-        float projectionZ = Vector3DotProduct(ray.direction, toSphereZ);
+        Vector3 toPointZ = Vector3Subtract(gizmoZ, ray.position);
+        float projectionZ = Vector3DotProduct(ray.direction, toPointZ);
 
         if (projectionZ < 0)
         {
             projectionZ = 0;
         }
 
-        // Find the closest point on the ray to the sphere center
+        // Find the closest point on the ray to the point center
         Vector3 closestPointZ = Vector3Add(ray.position, Vector3Scale(ray.direction, projectionZ));
         float distanceZ = Vector3Distance(closestPointZ, gizmoZ);
 
-        // Check if the mouse is touching the sphere
+        // Check if the mouse is touching the point
         if (distanceZ <= gizmoRad && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             isGizmoMod = true;
@@ -1157,7 +1157,7 @@ int main()
 
         //----------------------------------------------------------------
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 50 + 20 * 0, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 50 + 20*0, 100, 15 }, 
             "PosX", 
             TextFormat("%3.2f", modelPos.x), 
             &modelPos.x, 
@@ -1165,7 +1165,7 @@ int main()
             50.0f
         );
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 50 + 20 * 1, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 50 + 20*1, 100, 15 }, 
             "PosY", 
             TextFormat("%3.2f", modelPos.y), 
             &modelPos.y, 
@@ -1173,7 +1173,7 @@ int main()
             50.0f
         );
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 50 + 20 * 2, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 50 + 20*2, 100, 15 }, 
             "PosZ", 
             TextFormat("%3.2f", modelPos.z), 
             &modelPos.z, 
@@ -1183,7 +1183,7 @@ int main()
 
         //----------------------------------------------------------------
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 70 + 20 * 3, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 70 + 20*3, 100, 15 }, 
             "RotX", 
             TextFormat("%3.2f", modelRot.x), 
             &modelRot.x, 
@@ -1191,7 +1191,7 @@ int main()
             360.0f
         );
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 70 + 20 * 4, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 70 + 20*4, 100, 15 }, 
             "RotY", 
             TextFormat("%3.2f", modelRot.y), 
             &modelRot.y, 
@@ -1199,7 +1199,7 @@ int main()
             360.0f
         );
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 70 + 20 * 5, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 70 + 20*5, 100, 15 }, 
             "RotZ", 
             TextFormat("%3.2f", modelRot.z), 
             &modelRot.z, 
@@ -1209,7 +1209,7 @@ int main()
 
         //----------------------------------------------------------------
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 6, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 90 + 20*6, 100, 15 }, 
             "SclX", 
             TextFormat("%3.2f", modelScl.x), 
             &modelScl.x, 
@@ -1217,7 +1217,7 @@ int main()
             maxScl
         );
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 7, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 90 + 20*7, 100, 15 }, 
             "SclY", 
             TextFormat("%3.2f", modelScl.y), 
             &modelScl.y, 
@@ -1225,7 +1225,7 @@ int main()
             maxScl
         );
         GuiSliderBar(
-            (Rectangle){ uiTranformsLeft + 40, 90 + 20 * 8, 100, 15 }, 
+            (Rectangle){ uiTranformsLeft + 40, 90 + 20*8, 100, 15 }, 
             "SclZ", 
             TextFormat("%3.2f", modelScl.z), 
             &modelScl.z, 
@@ -1437,7 +1437,7 @@ int main()
             );
         }
 
-        /* Bone View Settings */
+        /* Bone view settings */
 
         //----------------------------------------------------------------
         if (isDrawWires)
