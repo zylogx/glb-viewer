@@ -392,7 +392,7 @@ void DrawTransform(Vector3 pos, Vector3 rot, Vector3 scl)
     );
 }
 
-void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl, bool isDrawCircles, bool isDrawCubes, bool isDrawAnimTransform)
+void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsigned animCurrentFrame, Vector3 pos, Vector3 rot, Vector3 scl, bool isDrawCircles, bool isDrawCubes, bool isDrawAnimTransform, BoneColor colors)
 {
     Matrix rotMatrix = MatrixRotateV(rot);
 
@@ -405,13 +405,13 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
 
         if (isDrawCubes)
         {
-            DrawCubeV(finalTranslation, Vector3Scale(scl, 0.1f), GREEN);
+            DrawCubeV(finalTranslation, Vector3Scale(scl, 0.1f), colors.cubeColor);
         }
 
         if (isDrawCircles)
         {
             float radius = (scl.x + scl.y + scl.z)/3.0f*0.1f;
-            DrawCircle3D(finalTranslation, radius, (Vector3){ 90.0f, 0.0f, 0.0f }, 130.0f, LIME);
+            DrawCircle3D(finalTranslation, radius, (Vector3){ 90.0f, 0.0f, 0.0f }, 130.0f, colors.circleColor);
         }
 
         if (isDrawAnimTransform)
@@ -428,7 +428,7 @@ void DrawModelBones(Model model, ModelAnimation* anims, unsigned animIndex, unsi
             parentFinalTranslation = Vector3Add(parentFinalTranslation, pos); // Final transformed position for parent
 
             // Draw a line between the bone and its parent
-            DrawLine3D(finalTranslation, parentFinalTranslation, BLUE);
+            DrawLine3D(finalTranslation, parentFinalTranslation, colors.baseLineColor);
         }
     }
 }
@@ -643,10 +643,12 @@ int main()
     char** animName = (char**)vector_create();
     char** animNameSlice = (char**)vector_create();
 
+    /*.....................................*/
     char* animNameOptions = " ";
     int animNameActiveOption = 0;   
     bool animNameDropdownEditMode = false;
 
+    /*.....................................*/
     unsigned animDropdownStart = 0;
     unsigned animDropdownEnd = 5;
     bool animDropdownIsDragging = false;
@@ -654,17 +656,28 @@ int main()
     bool isPlayAnimation = true;
     float currentFrame = 0.0f;
 
+    /*.....................................*/
     ScrollbarColor animScrollbarColor = { 0 };
+    BoneColor animBoneColor = InitBoneColor(LIME, GREEN, BLUE);
     
     animScrollbarColor.idleColor = DARKGRAY;
     animScrollbarColor.hoverColor = CBLUE;
     animScrollbarColor.draggedColor = DBLUE;
     animScrollbarColor.backgroundColor = LIGHTGRAY;
+    
+    /*.....................................*/
+    bool isUpdateBoneCircleColor = false;
+    bool isUpdateBoneCubeColor = false;
+    bool isUpdateBoneBaseLineColor = false;
 
+    /*.....................................*/
     bool isAnimDrawCubes = true;
     bool isAnimDrawCircles = true;
     bool isAnimDrawMainWires = true;
     bool isDrawAnimTransform = true;
+
+    /*.....................................*/
+    bool isAnimColorUpdate = false;
 
     //----------------------------------------------------------------
     float lastX = GetMouseX();
@@ -1145,7 +1158,8 @@ int main()
                         modelScl,
                         isAnimDrawCircles,
                         isAnimDrawCubes, 
-                        isDrawAnimTransform
+                        isDrawAnimTransform,
+                        animBoneColor
                     );
                 }
             }
@@ -1452,7 +1466,7 @@ int main()
         if (isDrawWires)
         {
             const int bonesViewSettingsLeft = 20;
-            GuiGroupBox((Rectangle){ bonesViewSettingsLeft, 100, 120, 90 }, "Bone View Settings");
+            GuiGroupBox((Rectangle){ bonesViewSettingsLeft, 100, 120, 125 }, "Bone View Settings");
 
             GuiCheckBox(
                 (Rectangle){ bonesViewSettingsLeft + 4, 110, 15, 15 }, 
@@ -1477,6 +1491,72 @@ int main()
                 "Draw Transform",
                 &isDrawAnimTransform
             );
+
+            if (GuiButton((Rectangle){ bonesViewSettingsLeft + 4, 200, 80, 20 }, "Change Color"))
+            {
+                isAnimColorUpdate = !isAnimColorUpdate;
+            }
+
+            if (isAnimColorUpdate)
+            {
+                const int bonesColorUpdateLeft = 150;
+                GuiGroupBox((Rectangle){ bonesColorUpdateLeft, 100, 120, 125 }, "Bone Colors");
+
+                GuiDrawText("Circle Color", (Rectangle){ bonesColorUpdateLeft + 5, 105, 120, 20 }, 0, GRAY);
+                DrawRectangleRec((Rectangle){ bonesColorUpdateLeft + 5, 125, 65, 16 }, animBoneColor.circleColor);
+
+                GuiDrawText("Cube Color", (Rectangle){ bonesColorUpdateLeft + 5, 145, 120, 20 }, 0, GRAY);
+                DrawRectangleRec((Rectangle){ bonesColorUpdateLeft + 5, 165, 65, 16 }, animBoneColor.cubeColor);
+                
+                GuiDrawText("Base Bone Color", (Rectangle){ bonesColorUpdateLeft + 5, 185, 120, 20 }, 0, GRAY);
+                DrawRectangleRec((Rectangle){ bonesColorUpdateLeft + 5, 205, 65, 16 }, animBoneColor.baseLineColor);
+
+                if (GuiButton((Rectangle){ bonesColorUpdateLeft + 77, 125, 40, 17 }, "Update") 
+                    && !isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+                {
+                    isUpdateBoneCircleColor = !isUpdateBoneCircleColor;
+                }
+                if (GuiButton((Rectangle){ bonesColorUpdateLeft + 77, 165, 40, 17 }, "Update")
+                    && !isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+                {
+                    isUpdateBoneCubeColor = !isUpdateBoneCubeColor;
+                }
+                if (GuiButton((Rectangle){ bonesColorUpdateLeft + 77, 205, 40, 17 }, "Update")
+                    && !isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+                {
+                    isUpdateBoneBaseLineColor = !isUpdateBoneBaseLineColor;
+                }
+            }
+
+            if (isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+            {
+                GuiColorPicker((Rectangle){ 280, 100, 140, 140 }, " ", &animBoneColor.circleColor);
+
+                if (GuiButton((Rectangle){ 380, 245, 40, 25 }, "OK"))
+                {
+                    isUpdateBoneCircleColor = !isUpdateBoneCircleColor;
+                }
+            }
+
+            if (!isUpdateBoneCircleColor && isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+            {
+                GuiColorPicker((Rectangle){ 280, 100, 140, 140 }, " ", &animBoneColor.cubeColor);
+
+                if (GuiButton((Rectangle){ 380, 245, 40, 25 }, "OK"))
+                {
+                    isUpdateBoneCubeColor = !isUpdateBoneCubeColor;
+                }
+            }
+
+            if (!isUpdateBoneCircleColor && !isUpdateBoneCubeColor && isUpdateBoneBaseLineColor)
+            {
+                GuiColorPicker((Rectangle){ 280, 100, 140, 140 }, " ", &animBoneColor.baseLineColor);
+
+                if (GuiButton((Rectangle){ 380, 245, 40, 25 }, "OK"))
+                {
+                    isUpdateBoneBaseLineColor = !isUpdateBoneBaseLineColor;
+                }
+            }
         }
 
         //----------------------------------------------------------------

@@ -31,5 +31,22 @@ typedef struct
     bool isDragging;
 } ScrollbarColor;
 
+typedef struct
+{
+    Color circleColor;
+    Color cubeColor;
+    Color baseLineColor;
+} BoneColor;
+
 #define CBLUE CLITERAL(Color){ 11, 174, 219, 255 }
 #define DBLUE CLITERAL(Color){ 20, 146, 181, 255 }
+
+BoneColor InitBoneColor(Color circleColor, Color cubeColor, Color baseLineColor)
+{
+    BoneColor colors = { 0 }; 
+    colors.circleColor   = circleColor;
+    colors.cubeColor     = cubeColor;
+    colors.baseLineColor = baseLineColor;
+
+    return colors;
+}
