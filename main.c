@@ -437,7 +437,7 @@ void DrawGizmo(Vector3* modelPos, Vector3* posX, Vector3* posY, Vector3* posZ, f
 {
     if (isGizmoMode)
     {
-        *modelPos = (Vector3){ posX->x - size, posX->y, posX->z };
+        *modelPos = (Vector3){ posX->x - size, posY->y - size, posZ->z - size };
     }
     else
     {
