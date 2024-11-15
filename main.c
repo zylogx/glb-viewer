@@ -585,6 +585,19 @@ BoneColor InitBoneColor(Color circleColor, Color cubeColor, Color baseLineColor)
     return colors;
 }
 
+ScrollbarColor InitScrollbarColor(Color backgroundColor, Color idleColor, Color hoverColor, Color draggedColor)
+{
+    ScrollbarColor colors = { 0 };
+    colors.idleColor         = idleColor;
+    colors.hoverColor        = hoverColor;
+    colors.draggedColor      = draggedColor;
+    colors.backgroundColor   = backgroundColor;
+    colors.currentThumbColor = idleColor;
+    colors.isDragging        = false;
+
+    return colors;
+}
+
 //----------------------------------------------------------------
 
 int main()
@@ -654,13 +667,8 @@ int main()
     float currentFrame = 0.0f;
 
     /*.....................................*/
-    ScrollbarColor animScrollbarColor = { 0 };
+    ScrollbarColor animScrollbarColor = InitScrollbarColor(LIGHTGRAY, DARKGRAY, CBLUE, DBLUE);
     BoneColor animBoneColor = InitBoneColor(LIME, GREEN, BLUE);
-    
-    animScrollbarColor.idleColor = DARKGRAY;
-    animScrollbarColor.hoverColor = CBLUE;
-    animScrollbarColor.draggedColor = DBLUE;
-    animScrollbarColor.backgroundColor = LIGHTGRAY;
     
     /*.....................................*/
     bool isUpdateBoneCircleColor = false;
