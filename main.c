@@ -28,22 +28,7 @@
 *
 **********************************************************************************************/
 
-#include "raylib.h"
-#include "assert.h"
-#include "custom_color.h"
-#include "vec.h"
-
-#define RAYGUI_IMPLEMENTATION
-#include "raygui-4.0/src/raygui.h"
-
-#undef RAYGUI_IMPLEMENTATION // Avoid including raygui implementation again
-#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
-#include "gui_window_file_dialog.h"
-
-#define debug true
-
-const int screenWidth = 1080;
-const int screenHeight = 720;
+#include "main.h"
 
 //----------------------------------------------------------------
 Matrix MatrixMultiply(Matrix a, Matrix b)
@@ -586,6 +571,18 @@ void LoadRobot(bool* flag)
 #if debug
     if (IsKeyPressed(KEY_K)) *flag = true;
 #endif
+}
+
+//----------------------------------------------------------------
+
+BoneColor InitBoneColor(Color circleColor, Color cubeColor, Color baseLineColor)
+{
+    BoneColor colors = { 0 }; 
+    colors.circleColor   = circleColor;
+    colors.cubeColor     = cubeColor;
+    colors.baseLineColor = baseLineColor;
+
+    return colors;
 }
 
 //----------------------------------------------------------------

@@ -1,5 +1,14 @@
 /*******************************************************************************************
 * 
+*          _____ _   _______ ______  __      _______ ________          ________ _____   
+*         / ____| | |__   __|  ____| \ \    / /_   _|  ____\ \        / /  ____|  __ \  
+*        | |  __| |    | |  | |__     \ \  / /  | | | |__   \ \  /\  / /| |__  | |__) | 
+*        | | |_ | |    | |  |  __|     \ \/ /   | | |  __|   \ \/  \/ / |  __| |  _  /  
+*        | |__| | |____| |  | |         \  /   _| |_| |____   \  /\  /  | |____| | \ \  
+*         \_____|______|_|  |_|          \/   |_____|______|   \/  \/   |______|_|  \_\ 
+*
+********************************************************************************************
+* 
 *   Copyright (c) 2024 Wildan R Wijanarko
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
@@ -20,6 +29,20 @@
 **********************************************************************************************/
 
 #include "raylib.h"
+#include "assert.h"
+#include "vec.h"
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui-4.0/src/raygui.h"
+
+#undef RAYGUI_IMPLEMENTATION // Avoid including raygui implementation again
+#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
+#include "gui_window_file_dialog.h"
+
+#define debug true
+
+const int screenWidth = 1080;
+const int screenHeight = 720;
 
 typedef struct 
 {
@@ -40,13 +63,3 @@ typedef struct
 
 #define CBLUE CLITERAL(Color){ 11, 174, 219, 255 }
 #define DBLUE CLITERAL(Color){ 20, 146, 181, 255 }
-
-BoneColor InitBoneColor(Color circleColor, Color cubeColor, Color baseLineColor)
-{
-    BoneColor colors = { 0 }; 
-    colors.circleColor   = circleColor;
-    colors.cubeColor     = cubeColor;
-    colors.baseLineColor = baseLineColor;
-
-    return colors;
-}
