@@ -933,12 +933,12 @@ int main()
                     if (animsCount > 0)
                     {
                         UnloadModelAnimations(modelAnimation, animsCount);
-                        free(animNameOptions);
+                        MemFree(animNameOptions);
                         vector_free(animName);
                     }
                     
                     UnloadModel(*model);
-                    free(model);
+                    MemFree(model);
 
                     currentFrame = 0.0f;
                     animNameOptions = " ";
@@ -947,7 +947,7 @@ int main()
                 }
 
                 animName = (char**)vector_create();
-                model = (Model*)malloc(sizeof(Model));
+                model = (Model*)MemAlloc(sizeof(Model));
                 *model = LoadModel(fileNameToLoad);
                 modelAnimation = LoadModelAnimations(fileNameToLoad, &animsCount);
 
@@ -973,7 +973,7 @@ int main()
                         totalLength += 1; // For the null terminator
 
                         // Allocate memory for the new concatenated string
-                        animNameOptions = (char*)malloc(totalLength*sizeof(char));
+                        animNameOptions = (char*)MemAlloc(totalLength*sizeof(char));
                         
                         assert(animNameOptions != NULL);
 
@@ -1006,7 +1006,7 @@ int main()
                         totalLength += 1; // For the null terminator
 
                         // Allocate memory for the new concatenated string
-                        animNameOptions = (char*)malloc(totalLength*sizeof(char));
+                        animNameOptions = (char*)MemAlloc(totalLength*sizeof(char));
                         
                         assert(animNameOptions != NULL);
 
@@ -1036,12 +1036,12 @@ int main()
                 if (animsCount > 0)
                 {
                     UnloadModelAnimations(modelAnimation, animsCount);
-                    free(animNameOptions);
+                    MemFree(animNameOptions);
                     vector_free(animName);
                 }
                 
                 UnloadModel(*model);
-                free(model);
+                MemFree(model);
 
                 currentFrame = 0.0f;
                 animNameOptions = " ";
@@ -1050,7 +1050,7 @@ int main()
             }
 
             animName = (char**)vector_create();
-            model = (Model*)malloc(sizeof(Model));
+            model = (Model*)MemAlloc(sizeof(Model));
             *model = LoadModel("./robot.glb");
             modelAnimation = LoadModelAnimations("./robot.glb", &animsCount);
 
@@ -1074,7 +1074,7 @@ int main()
                 totalLength += 1; // For the null terminator
 
                 // Allocate memory for the new concatenated string
-                animNameOptions = (char*)malloc(totalLength*sizeof(char));
+                animNameOptions = (char*)MemAlloc(totalLength*sizeof(char));
                 
                 assert(animNameOptions != NULL);
 
@@ -1107,7 +1107,7 @@ int main()
                 totalLength += 1; // For the null terminator
 
                 // Allocate memory for the new concatenated string
-                animNameOptions = (char*)malloc(totalLength*sizeof(char));
+                animNameOptions = (char*)MemAlloc(totalLength*sizeof(char));
                 
                 assert(animNameOptions != NULL);
 
@@ -1654,12 +1654,12 @@ int main()
         if (animsCount > 0)
         {
             UnloadModelAnimations(modelAnimation, animsCount);
-            free(animNameOptions);
+            MemFree(animNameOptions);
             vector_free(animName);
         }
 
         UnloadModel(*model);
-        free(model);
+        MemFree(model);
     }
 
     CloseWindow();
