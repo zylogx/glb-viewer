@@ -973,7 +973,7 @@ int main()
                         totalLength += 1; // For the null terminator
 
                         // Allocate memory for the new concatenated string
-                        animNameOptions = (char*)malloc(totalLength * sizeof(char));
+                        animNameOptions = (char*)malloc(totalLength*sizeof(char));
                         
                         assert(animNameOptions != NULL);
 
@@ -1006,7 +1006,7 @@ int main()
                         totalLength += 1; // For the null terminator
 
                         // Allocate memory for the new concatenated string
-                        animNameOptions = (char*)malloc(totalLength * sizeof(char));
+                        animNameOptions = (char*)malloc(totalLength*sizeof(char));
                         
                         assert(animNameOptions != NULL);
 
@@ -1074,7 +1074,7 @@ int main()
                 totalLength += 1; // For the null terminator
 
                 // Allocate memory for the new concatenated string
-                animNameOptions = (char*)malloc(totalLength * sizeof(char));
+                animNameOptions = (char*)malloc(totalLength*sizeof(char));
                 
                 assert(animNameOptions != NULL);
 
@@ -1107,7 +1107,7 @@ int main()
                 totalLength += 1; // For the null terminator
 
                 // Allocate memory for the new concatenated string
-                animNameOptions = (char*)malloc(totalLength * sizeof(char));
+                animNameOptions = (char*)malloc(totalLength*sizeof(char));
                 
                 assert(animNameOptions != NULL);
 
@@ -1516,18 +1516,20 @@ int main()
                 GuiDrawText("Base Bone Color", (Rectangle){ bonesColorUpdateLeft + 5, 185, 120, 20 }, 0, GRAY);
                 DrawRectangleRec((Rectangle){ bonesColorUpdateLeft + 5, 205, 65, 16 }, animBoneColor.baseLineColor);
 
+                bool isColorOnUpdate = !(!isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor);
+
                 if (GuiButton((Rectangle){ bonesColorUpdateLeft + 77, 125, 40, 17 }, "Update") 
-                    && !isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+                    && !isColorOnUpdate)
                 {
                     isUpdateBoneCircleColor = !isUpdateBoneCircleColor;
                 }
                 if (GuiButton((Rectangle){ bonesColorUpdateLeft + 77, 165, 40, 17 }, "Update")
-                    && !isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+                    && !isColorOnUpdate)
                 {
                     isUpdateBoneCubeColor = !isUpdateBoneCubeColor;
                 }
                 if (GuiButton((Rectangle){ bonesColorUpdateLeft + 77, 205, 40, 17 }, "Update")
-                    && !isUpdateBoneCircleColor && !isUpdateBoneCubeColor && !isUpdateBoneBaseLineColor)
+                    && !isColorOnUpdate)
                 {
                     isUpdateBoneBaseLineColor = !isUpdateBoneBaseLineColor;
                 }
